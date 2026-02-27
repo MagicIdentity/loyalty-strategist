@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Magic Strategist">
-  <meta name="description" content="Design loyalty programs for 185,000 verified Magic members">
+  <meta name="description" content="Design loyalty strategies for 185,000 verified Magic members">
   <title>Magic Loyalty Strategist</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -50,17 +50,24 @@
 
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
     }
 
     /* ══════════════════════════════════════════
        RESET & BASE
        ══════════════════════════════════════════ */
     *, *::before, *::after {
-      margin: 0; padding: 0; box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
 
-    html { height: 100%; overflow: hidden; }
+    html {
+      height: 100%;
+      overflow: hidden;
+    }
 
     body {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -72,19 +79,22 @@
       flex-direction: column;
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     /* ══════════════════════════════════════════
-       APP SHELL — mobile full-bleed, desktop card
+       OUTER SHELL — desktop card vs mobile full-bleed
        ══════════════════════════════════════════ */
     .app-shell {
       display: flex;
       flex-direction: column;
       height: 100%;
       width: 100%;
+      max-width: 100%;
       background: var(--surface);
     }
 
+    /* Desktop: centered card */
     @media (min-width: 768px) {
       body {
         align-items: center;
@@ -95,6 +105,7 @@
           radial-gradient(ellipse at 80% 20%, rgba(232, 168, 56, 0.04) 0%, transparent 40%),
           var(--bg);
       }
+
       .app-shell {
         max-width: 520px;
         height: min(92vh, 780px);
@@ -117,42 +128,70 @@
       gap: 12px;
       flex-shrink: 0;
       position: relative;
+      z-index: 10;
     }
 
     .header::after {
       content: '';
       position: absolute;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       height: 1px;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
     }
 
     .header-mark {
-      width: 38px; height: 38px;
+      width: 38px;
+      height: 38px;
       background: rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 20px;
       flex-shrink: 0;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .header-text { flex: 1; min-width: 0; }
-    .header-text h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
-    .header-text p { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+    .header-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .header-text h1 {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .header-text p {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-top: 1px;
+      font-weight: 400;
+    }
 
     .header-status {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 10px; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.05em;
-      opacity: 0.8; flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.8;
+      flex-shrink: 0;
     }
 
     .header-status .dot {
-      width: 6px; height: 6px;
-      background: #4ADE80; border-radius: 50%;
+      width: 6px;
+      height: 6px;
+      background: #4ADE80;
+      border-radius: 50%;
       animation: pulse-dot 2s ease-in-out infinite;
     }
 
@@ -178,7 +217,10 @@
     }
 
     @media (max-width: 767px) {
-      .chat-area { padding: 14px; gap: 10px; }
+      .chat-area {
+        padding: 14px;
+        gap: 10px;
+      }
     }
 
     /* ══════════════════════════════════════════
@@ -200,6 +242,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Assistant */
     .message.assistant {
       align-self: flex-start;
       background: var(--surface-raised);
@@ -209,6 +252,7 @@
       border: 1px solid var(--border-light);
     }
 
+    /* User */
     .message.user {
       align-self: flex-end;
       background: var(--magic-primary);
@@ -216,6 +260,7 @@
       border-bottom-right-radius: 4px;
     }
 
+    /* Error */
     .message.error {
       align-self: center;
       background: #FEF2F2;
@@ -226,6 +271,7 @@
       text-align: center;
     }
 
+    /* System */
     .message.system {
       align-self: center;
       background: var(--magic-wash);
@@ -248,23 +294,31 @@
       margin: 12px 0 4px 0;
       font-size: 15px;
       font-weight: 700;
+      letter-spacing: -0.01em;
     }
+
     .message.assistant h1:first-child,
     .message.assistant h2:first-child,
-    .message.assistant h3:first-child { margin-top: 0; }
+    .message.assistant h3:first-child {
+      margin-top: 0;
+    }
 
     .message.assistant strong { color: var(--magic-primary); }
     .message.assistant p { margin: 5px 0; }
+
     .message.assistant ol,
-    .message.assistant ul { margin: 5px 0 5px 20px; }
+    .message.assistant ul {
+      margin: 5px 0 5px 20px;
+    }
     .message.assistant li { margin: 2px 0; }
+
     .message.assistant a {
       color: var(--magic-mid);
       text-decoration: underline;
       text-underline-offset: 2px;
     }
 
-    /* Loyalty tables */
+    /* Offer tables */
     .message.assistant table {
       width: 100%;
       border-collapse: collapse;
@@ -292,8 +346,13 @@
       vertical-align: top;
     }
 
-    .message.assistant tbody tr:nth-child(even) { background: var(--magic-tint); }
-    .message.assistant tbody tr:last-child td { border-bottom: none; }
+    .message.assistant tbody tr:nth-child(even) {
+      background: var(--magic-tint);
+    }
+
+    .message.assistant tbody tr:last-child td {
+      border-bottom: none;
+    }
 
     .message.assistant tbody td:first-child {
       font-weight: 600;
@@ -302,6 +361,7 @@
       min-width: 100px;
     }
 
+    /* Mobile table adjustments */
     @media (max-width: 767px) {
       .message.assistant table { font-size: 12px; }
       .message.assistant thead th { padding: 6px 8px; font-size: 10px; }
@@ -322,12 +382,15 @@
 
     /* Hide code blocks (session data) */
     .message.assistant pre { display: none; }
+
     .message.assistant code {
       background: var(--magic-wash);
       padding: 1px 5px;
       border-radius: 4px;
       font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
     }
+
     .message.assistant hr {
       border: none;
       border-top: 2px solid var(--magic-primary);
@@ -345,9 +408,11 @@
       gap: 5px;
       padding: 0 20px 8px 20px;
     }
+
     @media (max-width: 767px) {
       .typing-container { padding: 0 14px 6px 14px; }
     }
+
     .typing-container.active { display: flex; }
 
     .typing-dots {
@@ -363,11 +428,13 @@
     }
 
     .typing-dots span {
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       background: var(--magic-light);
       border-radius: 50%;
       animation: bounce 1.4s infinite ease-in-out;
     }
+
     .typing-dots span:nth-child(2) { animation-delay: 0.16s; }
     .typing-dots span:nth-child(3) { animation-delay: 0.32s; }
 
@@ -397,8 +464,11 @@
       align-items: flex-end;
       flex-shrink: 0;
     }
+
     @media (min-width: 768px) {
-      .input-area { padding: 12px 20px 16px; }
+      .input-area {
+        padding: 12px 20px 16px;
+      }
     }
 
     .input-area textarea {
@@ -417,7 +487,11 @@
       color: var(--text-primary);
       line-height: 1.4;
     }
-    .input-area textarea::placeholder { color: var(--text-tertiary); }
+
+    .input-area textarea::placeholder {
+      color: var(--text-tertiary);
+    }
+
     .input-area textarea:focus {
       border-color: var(--magic-mid);
       background: var(--surface);
@@ -425,23 +499,41 @@
     }
 
     .send-btn {
-      width: 44px; height: 44px;
+      width: 44px;
+      height: 44px;
       border: none;
       background: var(--magic-primary);
       color: white;
       border-radius: 12px;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.15s ease;
       flex-shrink: 0;
     }
-    .send-btn:active { transform: scale(0.94); }
-    .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-    .send-btn:hover:not(:disabled) { background: var(--magic-mid); }
-    .send-btn svg { width: 18px; height: 18px; }
+
+    .send-btn:active {
+      transform: scale(0.94);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      background: var(--magic-mid);
+    }
+
+    .send-btn svg {
+      width: 18px;
+      height: 18px;
+    }
 
     /* ══════════════════════════════════════════
-       BANNERS
+       CONNECTION BANNER (offline / error)
        ══════════════════════════════════════════ */
     .connection-banner {
       display: none;
@@ -451,12 +543,63 @@
       text-align: center;
       flex-shrink: 0;
     }
+
     .connection-banner.offline {
       display: block;
       background: var(--honey-soft);
       color: #92400E;
     }
 
+    .connection-banner.error {
+      display: block;
+      background: #FEF2F2;
+      color: #B91C1C;
+    }
+
+    /* ══════════════════════════════════════════
+       LOADING SCREEN (initial)
+       ══════════════════════════════════════════ */
+    .splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--magic-deep), var(--magic-primary));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .splash.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-mark {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: splash-float 2s ease-in-out infinite;
+    }
+
+    .splash-text {
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      opacity: 0.9;
+    }
+
+    @keyframes splash-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* ══════════════════════════════════════════
+       INSTALL PROMPT
+       ══════════════════════════════════════════ */
     .install-prompt {
       display: none;
       padding: 10px 16px;
@@ -468,60 +611,56 @@
       gap: 10px;
       flex-shrink: 0;
     }
+
     .install-prompt.visible { display: flex; }
+
     .install-prompt span { flex: 1; }
 
     .install-btn {
-      background: var(--honey); color: white;
-      border: none; padding: 5px 14px;
+      background: var(--honey);
+      color: white;
+      border: none;
+      padding: 5px 14px;
       border-radius: var(--radius-full);
-      font-size: 12px; font-weight: 600;
-      font-family: inherit; cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
       white-space: nowrap;
     }
-    .install-dismiss {
-      background: none; border: none;
-      color: #78560E; cursor: pointer;
-      font-size: 16px; padding: 2px; opacity: 0.6;
-    }
 
-    /* ══════════════════════════════════════════
-       SPLASH SCREEN
-       ══════════════════════════════════════════ */
-    .splash {
-      position: fixed; inset: 0;
-      background: linear-gradient(135deg, var(--magic-deep), var(--magic-primary));
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      z-index: 100;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-    .splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .splash-mark {
-      font-size: 48px; margin-bottom: 16px;
-      animation: splash-float 2s ease-in-out infinite;
-    }
-    .splash-text {
-      color: white;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 18px; font-weight: 600;
-      opacity: 0.9;
-    }
-    @keyframes splash-float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
+    .install-dismiss {
+      background: none;
+      border: none;
+      color: #78560E;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px;
+      opacity: 0.6;
     }
 
     /* ══════════════════════════════════════════
        SCROLLBAR (desktop)
        ══════════════════════════════════════════ */
     @media (min-width: 768px) {
-      .chat-area::-webkit-scrollbar { width: 5px; }
-      .chat-area::-webkit-scrollbar-track { background: transparent; }
-      .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-      .chat-area::-webkit-scrollbar-thumb:hover { background: var(--magic-light); }
+      .chat-area::-webkit-scrollbar {
+        width: 5px;
+      }
+      .chat-area::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .chat-area::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 10px;
+      }
+      .chat-area::-webkit-scrollbar-thumb:hover {
+        background: var(--magic-light);
+      }
     }
 
+    /* ══════════════════════════════════════════
+       FOCUS STATES (accessibility)
+       ══════════════════════════════════════════ */
     :focus-visible {
       outline: 2px solid var(--magic-mid);
       outline-offset: 2px;
@@ -538,11 +677,12 @@
   </div>
 
   <div class="app-shell">
+    <!-- Header -->
     <div class="header">
       <div class="header-mark">🔮</div>
       <div class="header-text">
         <h1>Magic Loyalty Strategist</h1>
-        <p>Design Loyalty Programs for 185,000 members</p>
+        <p>Loyalty strategies for 185,000 members</p>
       </div>
       <div class="header-status">
         <span class="dot"></span>
@@ -550,16 +690,20 @@
       </div>
     </div>
 
+    <!-- Connection banner -->
     <div class="connection-banner" id="connectionBanner"></div>
 
+    <!-- Install prompt -->
     <div class="install-prompt" id="installPrompt">
       <span>📲 Add to your home screen for quick access</span>
       <button class="install-btn" id="installBtn">Install</button>
       <button class="install-dismiss" id="installDismiss">&times;</button>
     </div>
 
+    <!-- Chat area -->
     <div class="chat-area" id="chatArea"></div>
 
+    <!-- Typing indicator -->
     <div class="typing-container" id="typingContainer">
       <div class="typing-dots">
         <span></span><span></span><span></span>
@@ -567,6 +711,7 @@
       <div class="typing-status" id="typingStatus"></div>
     </div>
 
+    <!-- Input area -->
     <div class="input-area">
       <textarea
         id="userInput"
@@ -584,41 +729,54 @@
     </div>
   </div>
 
+  <!-- Marked.js for markdown rendering -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 
   <script>
-    // ══════════════════════════════════════════════════════════
-    // ⚠️  PASTE YOUR APPS SCRIPT WEB APP URL BELOW  ⚠️
-    // It looks like: https://script.google.com/macros/s/AKfycb.../exec
-    // ══════════════════════════════════════════════════════════
-    var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6fRXWxbOaYtaOWNx6W-DFoGdcS2PzrMgb6iH7dmCuU7gd7UNKRZEfpuU3UOiDvrt0qA/exec';
-    // ══════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════
+    // CONFIGURATION — UPDATE THIS
+    // ══════════════════════════════════════════
+    var APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+    // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
 
+    // ══════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════
     var conversationHistory = [];
     var isWaiting = false;
     var messageCount = 0;
     var statusTimers = [];
 
+    // ══════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════
     marked.setOptions({ breaks: true, gfm: true });
 
+    // Auto-resize textarea
     var textarea = document.getElementById('userInput');
     textarea.addEventListener('input', function() {
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
 
+    // Dismiss splash after content loads
     window.addEventListener('load', function() {
       setTimeout(function() {
         document.getElementById('splash').classList.add('hidden');
       }, 600);
+
+      // Show welcome message
       addMessage('assistant',
         'Welcome to Magic! 🔮\n\n' +
-        'I\'m your AI Programs Assistant. I\'ll help you design loyalty programs that bring Magic\'s ' +
+        'I\'m your AI Loyalty Strategist. I\'ll help you design offers that bring Magic\'s ' +
         '**185,000 verified members** to your business.\n\n' +
         'Should we speak in **English** or **Ελληνικά**?'
       );
     });
 
+    // ══════════════════════════════════════════
+    // KEYBOARD HANDLING
+    // ══════════════════════════════════════════
     function handleKeydown(e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -626,22 +784,42 @@
       }
     }
 
+    // Handle mobile keyboard resize
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', function() {
-        document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
+        // Scroll chat to bottom when keyboard opens
+        var chatArea = document.getElementById('chatArea');
+        chatArea.scrollTop = chatArea.scrollHeight;
       });
     }
 
+    // ══════════════════════════════════════════
+    // RESPONSE CLEANING
+    // ══════════════════════════════════════════
     function cleanResponse(text) {
+      // Remove session data section (📊 header through code block)
       text = text.replace(/📊[\s\S]*?```[\s\S]*?```/g, '');
+
+      // Remove standalone code blocks containing GS- data
       text = text.replace(/```[\s]*\n?[\s]*(?:SESSION_ID\|)?GS-[\s\S]*?```/g, '');
+
+      // Remove bare GS- data lines
       text = text.replace(/^(?:SESSION_ID\|)?GS-\d+\|.*$/gm, '');
       text = text.replace(/^GS-XXX\|.*$/gm, '');
+
+      // Remove "session saved" confirmations
       text = text.replace(/✅.*?(?:session|data|saved|CRM|σύστημα|αποθηκεύ).*$/gim, '');
+
+      // Remove "Session Data" headers
       text = text.replace(/📊.*?Session Data.*$/gim, '');
+
+      // Remove email markers
       text = text.replace(/```[\s]*\n?[\s]*📧[\s\S]*?```/g, '');
       text = text.replace(/📧EMAIL:.*?📧/g, '');
+
+      // Clean trailing whitespace
       text = text.replace(/\n{3,}/g, '\n\n').trim();
+
       return text;
     }
 
@@ -649,6 +827,9 @@
       return /📧EMAIL:.+?📧/.test(text);
     }
 
+    // ══════════════════════════════════════════
+    // STYLE STRATEGY BLOCKS
+    // ══════════════════════════════════════════
     function styleStrategyBlocks(html) {
       html = html.replace(
         /Strategy Note:?<\/strong>\s*([\s\S]*?)(?=Distribution Strategy|Option \d|<\/div>|$)/gi,
@@ -661,6 +842,9 @@
       return html;
     }
 
+    // ══════════════════════════════════════════
+    // ADD MESSAGE TO CHAT
+    // ══════════════════════════════════════════
     function addMessage(role, text) {
       var chatArea = document.getElementById('chatArea');
       var div = document.createElement('div');
@@ -674,6 +858,7 @@
       } else if (role === 'system') {
         div.textContent = text;
       } else {
+        // User and error messages — escape HTML
         div.innerHTML = text
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
@@ -682,26 +867,33 @@
       }
 
       chatArea.appendChild(div);
+
+      // Smooth scroll to bottom
       requestAnimationFrame(function() {
         chatArea.scrollTop = chatArea.scrollHeight;
       });
     }
 
+    // ══════════════════════════════════════════
+    // TYPING INDICATOR
+    // ══════════════════════════════════════════
     function startTypingStatus(isLongResponse) {
       var container = document.getElementById('typingContainer');
       var statusEl = document.getElementById('typingStatus');
       container.classList.add('active');
+
       clearStatusTimers();
 
       if (isLongResponse) {
-        [
+        var messages = [
           { delay: 0, text: '' },
           { delay: 2500, text: 'Reviewing your business profile...' },
           { delay: 6000, text: 'Analysing your products and audience...' },
-          { delay: 10000, text: 'Designing loyalty strategies...' },
-          { delay: 16000, text: 'Crafting your personalised loyalty programs...' },
+          { delay: 10000, text: 'Designing offer strategies...' },
+          { delay: 16000, text: 'Crafting your personalised offers...' },
           { delay: 23000, text: 'Almost there...' }
-        ].forEach(function(msg) {
+        ];
+        messages.forEach(function(msg) {
           statusTimers.push(setTimeout(function() {
             statusEl.textContent = msg.text;
           }, msg.delay));
@@ -709,7 +901,10 @@
       } else {
         statusEl.textContent = '';
       }
-      document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
+
+      // Scroll to show typing
+      var chatArea = document.getElementById('chatArea');
+      chatArea.scrollTop = chatArea.scrollHeight;
     }
 
     function stopTypingStatus() {
@@ -723,6 +918,9 @@
       statusTimers = [];
     }
 
+    // ══════════════════════════════════════════
+    // SEND MESSAGE (via fetch to Apps Script)
+    // ══════════════════════════════════════════
     function sendMessage() {
       if (isWaiting) return;
 
@@ -734,12 +932,16 @@
       input.value = '';
       input.style.height = 'auto';
 
-      if (window.innerWidth < 768) input.blur();
+      // Blur on mobile to dismiss keyboard
+      if (window.innerWidth < 768) {
+        input.blur();
+      }
 
       conversationHistory.push({ role: 'user', text: text });
       messageCount++;
 
       var isLongResponse = messageCount >= 3;
+
       isWaiting = true;
       startTypingStatus(isLongResponse);
       document.getElementById('sendBtn').disabled = true;
@@ -749,9 +951,9 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ history: conversationHistory })
       })
-      .then(function(r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
+      .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
       })
       .then(function(result) {
         isWaiting = false;
@@ -763,11 +965,11 @@
           addMessage('assistant', result.text);
 
           if (hasEmailMarker(result.text)) {
-            addMessage('system', '✉️ Program summary sent to your email');
+            addMessage('system', '✉️ Offer summary sent to your email');
           } else {
             var hasSessionData = result.text.match(/GS-\d+\|/) || result.text.match(/GS-XXX\|/);
             if (hasSessionData) {
-              addMessage('system', '🔒 Anonymised data helps us improve loyalty program suggestions for your business');
+              addMessage('system', '🔒 Anonymised data helps us improve offer suggestions for your business');
             }
           }
         } else {
@@ -779,43 +981,60 @@
         stopTypingStatus();
         document.getElementById('sendBtn').disabled = false;
         addMessage('error', 'Connection error. Please check your internet and try again.');
+        console.error('Fetch error:', err);
       });
     }
 
-    // PWA install prompt
+    // ══════════════════════════════════════════
+    // PWA INSTALL PROMPT
+    // ══════════════════════════════════════════
     var deferredPrompt = null;
+
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
       deferredPrompt = e;
+
+      // Show custom install banner
       document.getElementById('installPrompt').classList.add('visible');
     });
+
     document.getElementById('installBtn').addEventListener('click', function() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function() {
+        deferredPrompt.userChoice.then(function(choiceResult) {
           deferredPrompt = null;
           document.getElementById('installPrompt').classList.remove('visible');
         });
       }
     });
+
     document.getElementById('installDismiss').addEventListener('click', function() {
       document.getElementById('installPrompt').classList.remove('visible');
       deferredPrompt = null;
     });
 
-    // Online/offline
+    // ══════════════════════════════════════════
+    // ONLINE/OFFLINE HANDLING
+    // ══════════════════════════════════════════
+    var banner = document.getElementById('connectionBanner');
+
     window.addEventListener('offline', function() {
-      var b = document.getElementById('connectionBanner');
-      b.className = 'connection-banner offline';
-      b.textContent = 'You\'re offline — messages will send when you reconnect';
-    });
-    window.addEventListener('online', function() {
-      document.getElementById('connectionBanner').className = 'connection-banner';
+      banner.className = 'connection-banner offline';
+      banner.textContent = 'You\'re offline — messages will send when you reconnect';
     });
 
-    // Service worker
+    window.addEventListener('online', function() {
+      banner.className = 'connection-banner';
+      banner.textContent = '';
+    });
+
+    // ══════════════════════════════════════════
+    // SERVICE WORKER REGISTRATION
+    // ══════════════════════════════════════════
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(function() {});
+      navigator.serviceWorker.register('sw.js').catch(function(err) {
+        console.log('SW registration skipped:', err.message);
+      });
     }
   </script>
 </body>
