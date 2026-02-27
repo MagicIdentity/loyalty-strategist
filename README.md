@@ -1,1 +1,1 @@
-# loyalty-programs
+# offers
