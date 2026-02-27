@@ -1,7 +1,7 @@
 {
-  "name": "Magic Offer Assistant",
-  "short_name": "Magic Offers",
-  "description": "Design loyalty offers for 185,000 verified Magic members",
+  "name": "Magic Loyalty Strategist",
+  "short_name": "Magic Strategist",
+  "description": "Design loyalty programs for 185,000 verified Magic members",
   "start_url": "./",
   "display": "standalone",
   "orientation": "portrait",
