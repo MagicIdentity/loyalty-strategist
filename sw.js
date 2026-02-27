@@ -1,4 +1,4 @@
-var CACHE_NAME = 'magic-offers-v1';
+var CACHE_NAME = 'magic-strategist-v1';
 var STATIC_ASSETS = [
   './',
   './index.html',
