@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#3D1670">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Magic Offers">
-  <meta name="description" content="Design loyalty offers for 185,000 verified Magic members">
-  <title>Magic Offer Assistant</title>
+  <meta name="apple-mobile-web-app-title" content="Magic Strategist">
+  <meta name="description" content="Design loyalty programs for 185,000 verified Magic members">
+  <title>Magic Loyalty Strategist</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -264,7 +264,7 @@
       text-underline-offset: 2px;
     }
 
-    /* Offer tables */
+    /* Loyalty tables */
     .message.assistant table {
       width: 100%;
       border-collapse: collapse;
@@ -534,15 +534,15 @@
   <!-- Splash screen -->
   <div class="splash" id="splash">
     <div class="splash-mark">🔮</div>
-    <div class="splash-text">Magic Offer Assistant</div>
+    <div class="splash-text">Magic Loyalty Strategist</div>
   </div>
 
   <div class="app-shell">
     <div class="header">
       <div class="header-mark">🔮</div>
       <div class="header-text">
-        <h1>Magic Offer Assistant</h1>
-        <p>Design offers for 185,000 members</p>
+        <h1>Magic Loyalty Strategist</h1>
+        <p>Design Loyalty Programs for 185,000 members</p>
       </div>
       <div class="header-status">
         <span class="dot"></span>
@@ -613,7 +613,7 @@
       }, 600);
       addMessage('assistant',
         'Welcome to Magic! 🔮\n\n' +
-        'I\'m your AI Offer Assistant. I\'ll help you design offers that bring Magic\'s ' +
+        'I\'m your AI Programs Assistant. I\'ll help you design loyalty programs that bring Magic\'s ' +
         '**185,000 verified members** to your business.\n\n' +
         'Should we speak in **English** or **Ελληνικά**?'
       );
@@ -698,8 +698,8 @@
           { delay: 0, text: '' },
           { delay: 2500, text: 'Reviewing your business profile...' },
           { delay: 6000, text: 'Analysing your products and audience...' },
-          { delay: 10000, text: 'Designing offer strategies...' },
-          { delay: 16000, text: 'Crafting your personalised offers...' },
+          { delay: 10000, text: 'Designing loyalty strategies...' },
+          { delay: 16000, text: 'Crafting your personalised loyalty programs...' },
           { delay: 23000, text: 'Almost there...' }
         ].forEach(function(msg) {
           statusTimers.push(setTimeout(function() {
@@ -763,11 +763,11 @@
           addMessage('assistant', result.text);
 
           if (hasEmailMarker(result.text)) {
-            addMessage('system', '✉️ Offer summary sent to your email');
+            addMessage('system', '✉️ Program summary sent to your email');
           } else {
             var hasSessionData = result.text.match(/GS-\d+\|/) || result.text.match(/GS-XXX\|/);
             if (hasSessionData) {
-              addMessage('system', '🔒 Anonymised data helps us improve offer suggestions for your business');
+              addMessage('system', '🔒 Anonymised data helps us improve loyalty program suggestions for your business');
             }
           }
         } else {
