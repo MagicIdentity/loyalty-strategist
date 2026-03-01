@@ -1,11 +1,12 @@
-// Magic Loyalty Strategist — Service Worker
+// Magic Loyalty Strategist — Service Worker (v1.1)
 // Provides offline splash screen and caches static assets
+// v1.1: Added scheme guard to prevent chrome-extension cache errors
 
-var CACHE_NAME = 'magic-strategist-v1';
+var CACHE_NAME = 'magic-strategist-v2';
 var STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  './',
+  './index.html',
+  './manifest.json',
   'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js'
 ];
@@ -37,6 +38,11 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
   var url = new URL(event.request.url);
 
+  // Only handle http/https — skip chrome-extension://, data:, etc.
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+
   // API calls (to Apps Script) — always network, never cache
   if (event.request.method === 'POST' || url.hostname === 'script.google.com') {
     return; // Let the browser handle it normally
@@ -59,7 +65,7 @@ self.addEventListener('fetch', function(event) {
       }).catch(function() {
         // Offline fallback for navigation requests
         if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         }
       });
     })
