@@ -53,6 +53,9 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-right: env(safe-area-inset-right, 0px);
+
+      /* Desktop chat column max-width — single source of truth */
+      --col-width: 760px;
     }
 
     /* ══════════════════════════════════════════
@@ -84,7 +87,11 @@
     }
 
     /* ══════════════════════════════════════════
-       OUTER SHELL — desktop card vs mobile full-bleed
+       OUTER SHELL
+       Mobile  : full-bleed, fills the screen
+       Desktop : also full-bleed — content is
+                 centred via .chat-column, not
+                 by constraining the shell itself
        ══════════════════════════════════════════ */
     .app-shell {
       display: flex;
@@ -95,24 +102,12 @@
       background: var(--surface);
     }
 
-    /* Desktop: centered card */
     @media (min-width: 768px) {
       body {
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
         background:
           radial-gradient(ellipse at 20% 50%, rgba(74, 26, 138, 0.06) 0%, transparent 50%),
           radial-gradient(ellipse at 80% 20%, rgba(232, 168, 56, 0.04) 0%, transparent 40%),
           var(--bg);
-      }
-
-      .app-shell {
-        max-width: 520px;
-        height: min(92vh, 780px);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-light);
-        overflow: hidden;
       }
     }
 
@@ -217,11 +212,34 @@
       -webkit-overflow-scrolling: touch;
     }
 
+    /* Desktop: chat-area fills the screen but messages
+       live inside a centred column (injected by JS) */
+    @media (min-width: 768px) {
+      .chat-area {
+        padding: 24px 0;          /* vertical breathing room */
+        align-items: center;       /* horizontally centre the column */
+        gap: 0;                    /* gap handled by .chat-column */
+      }
+    }
+
     @media (max-width: 767px) {
       .chat-area {
         padding: 14px;
         gap: 10px;
       }
+    }
+
+    /* ══════════════════════════════════════════
+       DESKTOP CONTENT COLUMN
+       Created by JS on desktop, holds all messages
+       ══════════════════════════════════════════ */
+    .chat-column {
+      width: 100%;
+      max-width: var(--col-width);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 0 20px;     /* side breathing room within the column */
     }
 
     /* ══════════════════════════════════════════
@@ -236,6 +254,17 @@
       word-wrap: break-word;
       overflow-wrap: break-word;
       animation: msg-in 0.25s ease-out;
+    }
+
+    /* Desktop: give assistant messages full column width so
+       tables and strategy blocks have room to breathe */
+    @media (min-width: 768px) {
+      .message.assistant {
+        max-width: 100%;
+      }
+      .message.user {
+        max-width: 72%;
+      }
     }
 
     @keyframes msg-in {
@@ -328,6 +357,9 @@
       border-radius: var(--radius-sm);
       overflow: hidden;
       border: 1px solid var(--border);
+      /* Fixed layout so columns respect the width declarations
+         and long text wraps instead of blowing out the bubble */
+      table-layout: fixed;
     }
 
     .message.assistant thead th {
@@ -339,12 +371,17 @@
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      word-wrap: break-word;
     }
 
     .message.assistant tbody td {
       padding: 6px 10px;
       border-bottom: 1px solid var(--border-light);
       vertical-align: top;
+      /* Critical: allow cell text to wrap */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
     }
 
     .message.assistant tbody tr:nth-child(even) {
@@ -355,11 +392,17 @@
       border-bottom: none;
     }
 
+    /* Label column — fixed narrow width */
     .message.assistant tbody td:first-child {
       font-weight: 600;
       color: var(--magic-primary);
-      width: 35%;
-      min-width: 100px;
+      width: 32%;
+      min-width: 90px;
+    }
+
+    /* Value column — takes the rest */
+    .message.assistant tbody td:last-child {
+      width: 68%;
     }
 
     /* Mobile table adjustments */
@@ -367,18 +410,39 @@
       .message.assistant table { font-size: 12px; }
       .message.assistant thead th { padding: 6px 8px; font-size: 10px; }
       .message.assistant tbody td { padding: 5px 8px; }
-      .message.assistant tbody td:first-child { min-width: 80px; }
+      .message.assistant tbody td:first-child { min-width: 80px; width: 35%; }
+      .message.assistant tbody td:last-child { width: 65%; }
       .message { max-width: 93%; font-size: 13.5px; }
     }
 
-    /* Strategy blocks */
+    /* ══════════════════════════════════════════
+       STRATEGY & DISTRIBUTION BLOCKS
+       These are injected by styleStrategyBlocks()
+       into the live DOM after marked.parse().
+       display:block + width:100% makes them span
+       the full bubble regardless of where they land.
+       ══════════════════════════════════════════ */
     .strategy-block {
+      display: block;
+      width: 100%;
       background: var(--magic-wash);
       border-left: 3px solid var(--magic-mid);
-      padding: 8px 12px;
-      margin: 6px 0;
+      padding: 10px 14px;
+      margin: 8px 0;
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
       font-size: 13px;
+      line-height: 1.6;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      box-sizing: border-box;
+    }
+
+    .strategy-block strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--magic-primary);
+      font-weight: 700;
     }
 
     /* Hide code blocks (session data) */
@@ -403,11 +467,22 @@
        TYPING INDICATOR
        ══════════════════════════════════════════ */
     .typing-container {
-      align-self: flex-start;
       display: none;
       flex-direction: column;
       gap: 5px;
       padding: 0 20px 8px 20px;
+      align-self: flex-start;
+    }
+
+    /* Desktop: indent to match the chat column */
+    @media (min-width: 768px) {
+      .typing-container {
+        align-self: center;
+        width: 100%;
+        max-width: var(--col-width);
+        padding-left: 20px;
+        padding-right: 20px;
+      }
     }
 
     @media (max-width: 767px) {
@@ -426,6 +501,7 @@
       display: flex;
       gap: 4px;
       align-items: center;
+      align-self: flex-start;
     }
 
     .typing-dots span {
@@ -454,6 +530,7 @@
 
     /* ══════════════════════════════════════════
        INPUT AREA
+       Desktop: horizontally centred to match column
        ══════════════════════════════════════════ */
     .input-area {
       padding: 10px 16px;
@@ -468,7 +545,18 @@
 
     @media (min-width: 768px) {
       .input-area {
-        padding: 12px 20px 16px;
+        padding: 14px 20px 20px;
+        /* Centre the inner row to the chat column */
+        justify-content: center;
+      }
+
+      /* Constrain the textarea+button row to the column width */
+      .input-inner {
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+        width: 100%;
+        max-width: var(--col-width);
       }
     }
 
@@ -514,9 +602,7 @@
       flex-shrink: 0;
     }
 
-    .send-btn:active {
-      transform: scale(0.94);
-    }
+    .send-btn:active { transform: scale(0.94); }
 
     .send-btn:disabled {
       opacity: 0.35;
@@ -524,17 +610,12 @@
       transform: none;
     }
 
-    .send-btn:hover:not(:disabled) {
-      background: var(--magic-mid);
-    }
+    .send-btn:hover:not(:disabled) { background: var(--magic-mid); }
 
-    .send-btn svg {
-      width: 18px;
-      height: 18px;
-    }
+    .send-btn svg { width: 18px; height: 18px; }
 
     /* ══════════════════════════════════════════
-       CONNECTION BANNER (offline / error)
+       CONNECTION BANNER
        ══════════════════════════════════════════ */
     .connection-banner {
       display: none;
@@ -558,7 +639,7 @@
     }
 
     /* ══════════════════════════════════════════
-       LOADING SCREEN (initial)
+       SPLASH SCREEN
        ══════════════════════════════════════════ */
     .splash {
       position: fixed;
@@ -614,7 +695,6 @@
     }
 
     .install-prompt.visible { display: flex; }
-
     .install-prompt span { flex: 1; }
 
     .install-btn {
@@ -644,23 +724,14 @@
        SCROLLBAR (desktop)
        ══════════════════════════════════════════ */
     @media (min-width: 768px) {
-      .chat-area::-webkit-scrollbar {
-        width: 5px;
-      }
-      .chat-area::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .chat-area::-webkit-scrollbar-thumb {
-        background: var(--border);
-        border-radius: 10px;
-      }
-      .chat-area::-webkit-scrollbar-thumb:hover {
-        background: var(--magic-light);
-      }
+      .chat-area::-webkit-scrollbar { width: 5px; }
+      .chat-area::-webkit-scrollbar-track { background: transparent; }
+      .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+      .chat-area::-webkit-scrollbar-thumb:hover { background: var(--magic-light); }
     }
 
     /* ══════════════════════════════════════════
-       FOCUS STATES (accessibility)
+       FOCUS STATES
        ══════════════════════════════════════════ */
     :focus-visible {
       outline: 2px solid var(--magic-mid);
@@ -712,30 +783,31 @@
       <div class="typing-status" id="typingStatus"></div>
     </div>
 
-    <!-- Input area -->
-    <div class="input-area">
-      <textarea
-        id="userInput"
-        placeholder="Type your message..."
-        rows="1"
-        onkeydown="handleKeydown(event)"
-        enterkeyhint="send"
-      ></textarea>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"></line>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-        </svg>
-      </button>
+    <!-- Input area — on desktop the .input-inner wrapper centres to the column -->
+    <div class="input-area" id="inputArea">
+      <div class="input-inner" id="inputInner">
+        <textarea
+          id="userInput"
+          placeholder="Type your message..."
+          rows="1"
+          onkeydown="handleKeydown(event)"
+          enterkeyhint="send"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Marked.js for markdown rendering -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 
   <script>
     // ══════════════════════════════════════════
-    // CONFIGURATION — hardcoded for merchant access
+    // CONFIGURATION
     // ══════════════════════════════════════════
     var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1zCh0OxmD6MGs4iNk2B1EEdg9elXzTwc3k2mygbdvSnb26VvjblUHxifn0BvYUyzqTA/exec';
 
@@ -746,6 +818,34 @@
     var isWaiting = false;
     var statusTimers = [];
     var messageCount = 0;
+
+    // ══════════════════════════════════════════
+    // DESKTOP COLUMN MANAGEMENT
+    // On desktop, messages go inside a .chat-column
+    // div centred inside .chat-area. On mobile they
+    // append directly to .chat-area.
+    // ══════════════════════════════════════════
+    var chatColumn = null;
+
+    function isDesktop() {
+      return window.innerWidth >= 768;
+    }
+
+    function getChatTarget() {
+      if (isDesktop()) {
+        if (!chatColumn) {
+          chatColumn = document.createElement('div');
+          chatColumn.className = 'chat-column';
+          document.getElementById('chatArea').appendChild(chatColumn);
+        }
+        return chatColumn;
+      }
+      return document.getElementById('chatArea');
+    }
+
+    window.addEventListener('resize', function() {
+      if (!isDesktop()) chatColumn = null;
+    });
 
     // ══════════════════════════════════════════
     // MARKED CONFIG
@@ -761,18 +861,20 @@
     // INIT
     // ══════════════════════════════════════════
     window.addEventListener('load', function() {
-      // Hide splash
       setTimeout(function() {
         document.getElementById('splash').classList.add('hidden');
         showWelcome();
       }, 800);
 
-      // Auto-grow textarea
       var input = document.getElementById('userInput');
       input.addEventListener('input', function() {
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 120) + 'px';
       });
+
+      // On mobile, remove the .input-inner wrapper styles
+      // (CSS already handles this via the media query, but
+      // this ensures the DOM structure is flat on mobile)
     });
 
     function showWelcome() {
@@ -785,29 +887,17 @@
     }
 
     // ══════════════════════════════════════════
-    // CLEAN RESPONSE (hide internal data from display)
+    // CLEAN RESPONSE
     // ══════════════════════════════════════════
     function cleanResponse(text) {
-      // Remove session data in code blocks
       text = text.replace(/```[\s]*\n?[\s]*(?:SESSION_ID\|)?GS-[\s\S]*?```/g, '');
-
-      // Remove bare GS- data lines
       text = text.replace(/^(?:SESSION_ID\|)?GS-\d+\|.*$/gm, '');
       text = text.replace(/^GS-XXX\|.*$/gm, '');
-
-      // Remove "session saved" confirmations
       text = text.replace(/✅.*?(?:session|data|saved|CRM|σύστημα|αποθηκεύ).*$/gim, '');
-
-      // Remove "Session Data" headers
       text = text.replace(/📊.*?Session Data.*$/gim, '');
-
-      // Remove email markers
       text = text.replace(/```[\s]*\n?[\s]*📧[\s\S]*?```/g, '');
       text = text.replace(/📧EMAIL:.*?📧/g, '');
-
-      // Clean trailing whitespace
       text = text.replace(/\n{3,}/g, '\n\n').trim();
-
       return text;
     }
 
@@ -816,37 +906,86 @@
     }
 
     // ══════════════════════════════════════════
-    // STYLE STRATEGY BLOCKS
+    // STRATEGY BLOCK DETECTION & REPLACEMENT
+    // Operates on the live DOM *after* marked.parse()
+    // so we're working with real nodes, not HTML strings.
+    // Handles both English and Greek label variants.
     // ══════════════════════════════════════════
-    function styleStrategyBlocks(html) {
-      html = html.replace(
-        /Strategy Note:?<\/strong>\s*([\s\S]*?)(?=Distribution Strategy|Option \d|<\/div>|$)/gi,
-        '<div class="strategy-block">🎯 <strong>Strategy Note:</strong> $1</div>'
-      );
-      html = html.replace(
-        /Distribution Strategy:?<\/strong>\s*([\s\S]*?)(?=Option \d|Strategy Note|<\/div>|$)/gi,
-        '<div class="strategy-block">📢 <strong>Distribution:</strong> $1</div>'
-      );
-      return html;
+    var STRATEGY_LABELS = [
+      'Strategy Note',
+      'Σημείωση Στρατηγικής',
+      'Σημείωση Στρατηγικης',
+      'Strategy Note / Σημείωση Στρατηγικής'
+    ];
+
+    var DISTRIB_LABELS = [
+      'Distribution Strategy',
+      'Στρατηγική Διανομής',
+      'Στρατηγικής Διανομής',
+      'Στρατηγικης Διανομης',
+      'Distribution Strategy / Στρατηγικής Διανομής',
+      'Στρατηγική Διανομής / Distribution Strategy'
+    ];
+
+    function normaliseLabel(str) {
+      return str.trim().replace(/:$/, '').trim();
+    }
+
+    function styleStrategyBlocks(container) {
+      // Collect all elements that might contain a bold strategy label.
+      // We look inside <p> and <td> elements for <strong> children.
+      var candidates = container.querySelectorAll('p, td, li');
+
+      candidates.forEach(function(el) {
+        var bolds = el.querySelectorAll('strong');
+        bolds.forEach(function(bold) {
+          var label = normaliseLabel(bold.textContent);
+
+          var isStrategy = STRATEGY_LABELS.indexOf(label) !== -1;
+          var isDistrib  = DISTRIB_LABELS.indexOf(label) !== -1;
+
+          if (!isStrategy && !isDistrib) return;
+
+          // Build the replacement block
+          var block = document.createElement('div');
+          block.className = 'strategy-block';
+
+          var icon      = isDistrib ? '📢 ' : '🎯 ';
+          var labelText = isDistrib ? 'Distribution Strategy' : 'Strategy Note';
+
+          // Grab body text: full element text minus the bold label text
+          var fullText = el.textContent || '';
+          var bodyText = fullText.replace(bold.textContent, '').replace(/^[\s:]+/, '').trim();
+
+          var strongEl = document.createElement('strong');
+          strongEl.textContent = icon + labelText + ':';
+
+          block.appendChild(strongEl);
+          block.appendChild(document.createTextNode(' ' + bodyText));
+
+          // Replace the original element in the DOM
+          if (el.parentNode) {
+            el.parentNode.replaceChild(block, el);
+          }
+        });
+      });
     }
 
     // ══════════════════════════════════════════
-    // ADD MESSAGE TO CHAT
+    // ADD MESSAGE
     // ══════════════════════════════════════════
     function addMessage(role, text) {
-      var chatArea = document.getElementById('chatArea');
+      var target = getChatTarget();
       var div = document.createElement('div');
       div.className = 'message ' + role;
 
       if (role === 'assistant') {
         var cleaned = cleanResponse(text);
-        var html = marked.parse(cleaned);
-        html = styleStrategyBlocks(html);
-        div.innerHTML = html;
+        div.innerHTML = marked.parse(cleaned);
+        styleStrategyBlocks(div);
       } else if (role === 'system') {
         div.textContent = text;
       } else {
-        // User and error messages — escape HTML
         div.innerHTML = text
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
@@ -854,9 +993,9 @@
           .replace(/\n/g, '<br>');
       }
 
-      chatArea.appendChild(div);
+      target.appendChild(div);
 
-      // Smooth scroll to bottom
+      var chatArea = document.getElementById('chatArea');
       requestAnimationFrame(function() {
         chatArea.scrollTop = chatArea.scrollHeight;
       });
@@ -866,28 +1005,25 @@
     // TYPING INDICATOR
     // ══════════════════════════════════════════
     function startTypingStatus(isLongResponse) {
-      var container = document.getElementById('typingContainer');
-      var statusEl = document.getElementById('typingStatus');
-      container.classList.add('active');
-
+      document.getElementById('typingContainer').classList.add('active');
       clearStatusTimers();
 
       if (isLongResponse) {
         var messages = [
-          { delay: 0, text: '' },
-          { delay: 3000, text: 'designing your offers...' },
-          { delay: 7000, text: 'analysing your market...' },
+          { delay: 0,     text: '' },
+          { delay: 3000,  text: 'designing your offers...' },
+          { delay: 7000,  text: 'analysing your market...' },
           { delay: 12000, text: 'crafting strategies...' }
         ];
         messages.forEach(function(msg) {
           statusTimers.push(setTimeout(function() {
-            statusEl.textContent = msg.text;
+            document.getElementById('typingStatus').textContent = msg.text;
           }, msg.delay));
         });
       }
 
-      document.getElementById('chatArea').scrollTop =
-        document.getElementById('chatArea').scrollHeight;
+      var ca = document.getElementById('chatArea');
+      ca.scrollTop = ca.scrollHeight;
     }
 
     function stopTypingStatus() {
@@ -902,7 +1038,7 @@
     }
 
     // ══════════════════════════════════════════
-    // KEYBOARD HANDLING
+    // KEYBOARD
     // ══════════════════════════════════════════
     function handleKeydown(event) {
       if (event.key === 'Enter' && !event.shiftKey) {
@@ -916,7 +1052,6 @@
     // ══════════════════════════════════════════
     function sendMessage() {
       if (isWaiting) return;
-
       var input = document.getElementById('userInput');
       var text = input.value.trim();
       if (!text) return;
@@ -924,14 +1059,11 @@
       addMessage('user', text);
       input.value = '';
       input.style.height = 'auto';
-
       conversationHistory.push({ role: 'user', text: text });
       messageCount++;
 
-      var isLongResponse = messageCount >= 3;
-
       isWaiting = true;
-      startTypingStatus(isLongResponse);
+      startTypingStatus(messageCount >= 3);
       document.getElementById('sendBtn').disabled = true;
 
       fetch(APPS_SCRIPT_URL, {
@@ -940,9 +1072,9 @@
         body: JSON.stringify({ history: conversationHistory }),
         redirect: 'follow'
       })
-      .then(function(response) {
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return response.json();
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
       })
       .then(function(result) {
         isWaiting = false;
@@ -955,11 +1087,8 @@
 
           if (hasEmailMarker(result.text)) {
             addMessage('system', '✉️ Offer summary sent to your email');
-          } else {
-            var hasSessionData = result.text.match(/GS-\d+\|/) || result.text.match(/GS-XXX\|/);
-            if (hasSessionData) {
-              addMessage('system', '🔒 Anonymised data helps us improve offer suggestions for your business');
-            }
+          } else if (result.text.match(/GS-\d+\|/) || result.text.match(/GS-XXX\|/)) {
+            addMessage('system', '🔒 Anonymised data helps us improve offer suggestions for your business');
           }
         } else {
           addMessage('error', 'Error: ' + (result.error || 'Something went wrong'));
@@ -982,15 +1111,13 @@
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
       deferredPrompt = e;
-
-      // Show custom install banner
       document.getElementById('installPrompt').classList.add('visible');
     });
 
     document.getElementById('installBtn').addEventListener('click', function() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function(choiceResult) {
+        deferredPrompt.userChoice.then(function() {
           deferredPrompt = null;
           document.getElementById('installPrompt').classList.remove('visible');
         });
@@ -1003,22 +1130,20 @@
     });
 
     // ══════════════════════════════════════════
-    // ONLINE/OFFLINE HANDLING
+    // ONLINE / OFFLINE
     // ══════════════════════════════════════════
     var banner = document.getElementById('connectionBanner');
-
     window.addEventListener('offline', function() {
       banner.className = 'connection-banner offline';
       banner.textContent = 'You\'re offline — messages will send when you reconnect';
     });
-
     window.addEventListener('online', function() {
       banner.className = 'connection-banner';
       banner.textContent = '';
     });
 
     // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
+    // SERVICE WORKER
     // ══════════════════════════════════════════
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(function(err) {
