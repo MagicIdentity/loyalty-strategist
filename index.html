@@ -1018,13 +1018,67 @@
     });
 
     // ══════════════════════════════════════════
-    // SERVICE WORKER REGISTRATION
+    // SERVICE WORKER + VERSION CHECK
     // ══════════════════════════════════════════
+    var APP_VERSION = '2.0.0';
+
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(function(err) {
-        console.log('SW registration skipped:', err.message);
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+        .then(function(registration) {
+          // Check for updates every 60 seconds while the page is open
+          setInterval(function() { registration.update(); }, 60000);
+
+          // Listen for a new service worker waiting to activate
+          registration.addEventListener('updatefound', function() {
+            var newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', function() {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  showUpdateBanner();
+                }
+              });
+            }
+          });
+        })
+        .catch(function(err) {
+          console.log('SW registration skipped:', err.message);
+        });
+
+      // If a new SW activates while we're open, reload
+      navigator.serviceWorker.addEventListener('controllerchange', function() {
+        window.location.reload();
       });
     }
+
+    // Version check — catches updates even if SW lifecycle is slow
+    function checkVersion() {
+      fetch('version.json?_=' + Date.now())
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.version && data.version !== APP_VERSION) {
+            console.log('New version available: ' + data.version + ' (running ' + APP_VERSION + ')');
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+              navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+            }
+            showUpdateBanner();
+          }
+        })
+        .catch(function() { /* offline or version.json missing — ignore */ });
+    }
+
+    function showUpdateBanner() {
+      if (document.getElementById('updateBanner')) return; // already showing
+      var b = document.createElement('div');
+      b.id = 'updateBanner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#4A1A8A;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-family:DM Sans,sans-serif;font-size:14px;';
+      b.innerHTML = '<span>A new version is available</span><button onclick="window.location.reload()" style="background:#fff;color:#4A1A8A;border:none;padding:6px 16px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;">Refresh</button>';
+      document.body.prepend(b);
+    }
+
+    // Check version on load and every 5 minutes
+    checkVersion();
+    setInterval(checkVersion, 300000);
+    
   </script>
 </body>
 </html>
