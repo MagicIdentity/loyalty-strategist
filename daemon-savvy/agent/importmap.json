@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "$static/": "https://webdaemon.online/dev/static/"
+  }
+}

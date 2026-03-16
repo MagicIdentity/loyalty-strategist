@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+  <meta name="theme-color" content="#3D1670">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Magic Strategist">
+  <meta name="description" content="Design loyalty strategies for 185,000 verified Magic members">
+  <title>Magic Loyalty Strategist</title>
+
+  <!-- WebDaemon — identity only (no backend agent) -->
+  <link rel="webdaemon" href="agent.yml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --magic-deep: #3D1670;
+      --magic-primary: #4A1A8A;
+      --magic-mid: #6B3FA0;
+      --magic-light: #9B6FCC;
+      --magic-wash: #F3EEFA;
+      --magic-tint: #F9F6FD;
+      --honey: #E8A838;
+      --honey-soft: #FFF4DB;
+      --surface: #FFFFFF;
+      --surface-raised: #FFFFFF;
+      --bg: #F7F4FB;
+      --text-primary: #1A1425;
+      --text-secondary: #6B5F7A;
+      --text-tertiary: #9B91A8;
+      --border: #E8E0F0;
+      --border-light: #F0EBF5;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px rgba(61, 22, 112, 0.06);
+      --shadow-md: 0 4px 12px rgba(61, 22, 112, 0.08);
+      --shadow-lg: 0 8px 30px rgba(61, 22, 112, 0.12);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg); color: var(--text-primary);
+      height: 100%; height: 100dvh;
+      display: flex; flex-direction: column; overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-shell { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 100%; background: var(--surface); }
+
+    @media (min-width: 768px) {
+      body {
+        align-items: center; justify-content: center; padding: 24px;
+        background: radial-gradient(ellipse at 20% 50%, rgba(74,26,138,0.06) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 20%, rgba(232,168,56,0.04) 0%, transparent 40%), var(--bg);
+      }
+      .app-shell { max-width: 520px; height: min(92vh, 780px); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-light); overflow: hidden; }
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--magic-deep) 0%, var(--magic-primary) 60%, var(--magic-mid) 100%);
+      color: white; padding: 14px 20px; padding-top: calc(14px + var(--safe-top));
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0; position: relative; z-index: 10;
+    }
+    .header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); }
+    .header-mark { width: 38px; height: 38px; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1); }
+    .header-text { flex: 1; min-width: 0; }
+    .header-text h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
+    .header-text p { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+    .header-status { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; flex-shrink: 0; }
+    .header-status .dot { width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .identity-banner { display: none; padding: 8px 16px; background: linear-gradient(90deg, var(--magic-wash), var(--magic-tint)); border-bottom: 1px solid var(--border-light); font-size: 12px; color: var(--magic-mid); font-weight: 500; align-items: center; gap: 6px; flex-shrink: 0; }
+    .identity-banner.visible { display: flex; }
+    .identity-banner .id-dot { width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; flex-shrink: 0; }
+
+    .chat-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+    @media (max-width: 767px) { .chat-area { padding: 14px; gap: 10px; } }
+
+    .message { max-width: 88%; padding: 12px 16px; border-radius: var(--radius-md); font-size: 14px; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; animation: msg-in 0.25s ease-out; }
+    @keyframes msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .message.assistant { align-self: flex-start; background: var(--surface-raised); color: var(--text-primary); border-bottom-left-radius: 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+    .message.user { align-self: flex-end; background: var(--magic-primary); color: white; border-bottom-right-radius: 4px; }
+    .message.error { align-self: center; background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; font-size: 13px; max-width: 90%; text-align: center; }
+    .message.system { align-self: center; background: var(--magic-wash); color: var(--magic-light); font-size: 11px; font-weight: 500; padding: 5px 14px; border-radius: var(--radius-full); max-width: 90%; text-align: center; }
+
+    .message.assistant h1, .message.assistant h2, .message.assistant h3 { color: var(--magic-primary); margin: 12px 0 4px 0; font-size: 15px; font-weight: 700; }
+    .message.assistant h1:first-child, .message.assistant h2:first-child, .message.assistant h3:first-child { margin-top: 0; }
+    .message.assistant strong { color: var(--magic-primary); }
+    .message.assistant p { margin: 5px 0; }
+    .message.assistant ol, .message.assistant ul { margin: 5px 0 5px 20px; }
+    .message.assistant li { margin: 2px 0; }
+    .message.assistant a { color: var(--magic-mid); text-decoration: underline; text-underline-offset: 2px; }
+    .message.assistant table { width: 100%; border-collapse: collapse; margin: 8px 0 10px 0; font-size: 13px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+    .message.assistant thead th { background: var(--magic-primary); color: white; padding: 7px 10px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .message.assistant tbody td { padding: 6px 10px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+    .message.assistant tbody tr:nth-child(even) { background: var(--magic-tint); }
+    .message.assistant tbody tr:last-child td { border-bottom: none; }
+    .message.assistant tbody td:first-child { font-weight: 600; color: var(--magic-primary); width: 35%; min-width: 100px; }
+    @media (max-width: 767px) {
+      .message.assistant table { font-size: 12px; }
+      .message.assistant thead th { padding: 6px 8px; font-size: 10px; }
+      .message.assistant tbody td { padding: 5px 8px; }
+      .message.assistant tbody td:first-child { min-width: 80px; }
+      .message { max-width: 93%; font-size: 13.5px; }
+    }
+    .strategy-block { background: var(--magic-wash); border-left: 3px solid var(--magic-mid); padding: 8px 12px; margin: 6px 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 13px; }
+    .message.assistant pre { display: none; }
+    .message.assistant code { background: var(--magic-wash); padding: 1px 5px; border-radius: 4px; font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .message.assistant hr { border: none; border-top: 2px solid var(--magic-primary); margin: 14px 0; opacity: 0.3; }
+
+    .typing-container { align-self: flex-start; display: none; flex-direction: column; gap: 5px; padding: 0 20px 8px 20px; }
+    @media (max-width: 767px) { .typing-container { padding: 0 14px 6px 14px; } }
+    .typing-container.active { display: flex; }
+    .typing-dots { background: var(--surface-raised); padding: 10px 18px; border-radius: var(--radius-md); border-bottom-left-radius: 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); display: flex; gap: 4px; align-items: center; }
+    .typing-dots span { width: 7px; height: 7px; background: var(--magic-light); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.16s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.32s; }
+    .typing-status { font-size: 11px; color: var(--text-tertiary); padding-left: 6px; min-height: 16px; font-weight: 500; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.35; } 40% { transform: scale(1); opacity: 1; } }
+
+    .input-area { padding: 10px 16px; padding-bottom: calc(10px + var(--safe-bottom)); background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+    @media (min-width: 768px) { .input-area { padding: 12px 20px 16px; } }
+    .input-area textarea { flex: 1; border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 15px; font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; resize: none; min-height: 44px; max-height: 120px; outline: none; transition: border-color 0.2s; background: var(--magic-tint); color: var(--text-primary); line-height: 1.4; }
+    .input-area textarea::placeholder { color: var(--text-tertiary); }
+    .input-area textarea:focus { border-color: var(--magic-mid); background: var(--surface); box-shadow: 0 0 0 3px rgba(74,26,138,0.08); }
+    .send-btn { width: 44px; height: 44px; border: none; background: var(--magic-primary); color: white; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; flex-shrink: 0; }
+    .send-btn:active { transform: scale(0.94); }
+    .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .send-btn:hover:not(:disabled) { background: var(--magic-mid); }
+    .send-btn svg { width: 18px; height: 18px; }
+
+    .connection-banner { display: none; padding: 6px 16px; font-size: 12px; font-weight: 500; text-align: center; flex-shrink: 0; }
+    .connection-banner.offline { display: block; background: var(--honey-soft); color: #92400E; }
+
+    .splash { position: fixed; inset: 0; background: linear-gradient(135deg, var(--magic-deep), var(--magic-primary)); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.3s ease, visibility 0.3s ease; }
+    .splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .splash-mark { font-size: 48px; margin-bottom: 16px; animation: splash-float 2s ease-in-out infinite; }
+    .splash-text { color: white; font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; opacity: 0.9; }
+    @keyframes splash-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+    @media (min-width: 768px) {
+      .chat-area::-webkit-scrollbar { width: 5px; }
+      .chat-area::-webkit-scrollbar-track { background: transparent; }
+      .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+      .chat-area::-webkit-scrollbar-thumb:hover { background: var(--magic-light); }
+    }
+    :focus-visible { outline: 2px solid var(--magic-mid); outline-offset: 2px; }
+  </style>
+</head>
+
+<body>
+  <div class="splash" id="splash">
+    <div class="splash-mark">🔮</div>
+    <div class="splash-text">Magic Loyalty Strategist</div>
+  </div>
+
+  <div class="app-shell">
+    <div class="header">
+      <div class="header-mark">🔮</div>
+      <div class="header-text">
+        <h1>Magic Loyalty Strategist</h1>
+        <p>Loyalty strategies for 185,000 members</p>
+      </div>
+      <div class="header-status"><span class="dot"></span><span>ONLINE</span></div>
+    </div>
+
+    <div class="connection-banner" id="connectionBanner"></div>
+
+    <div class="identity-banner" id="identityBanner">
+      <span class="id-dot"></span>
+      <span id="identityText"></span>
+    </div>
+
+    <div class="chat-area" id="chatArea"></div>
+
+    <div class="typing-container" id="typingContainer">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+      <div class="typing-status" id="typingStatus"></div>
+    </div>
+
+    <div class="input-area">
+      <textarea id="userInput" placeholder="Type your message..." rows="1" enterkeyhint="send"></textarea>
+      <button class="send-btn" id="sendBtn" aria-label="Send message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+
+  <script type='importmap'>
+    { "imports": { "$static/": "https://webdaemon.online/dev/static/" } }
+  </script>
+
+  <script type="module">
+    import { BrowserApp } from '$static/lib/js/BrowserApp.js'
+
+    // ══════════════════════════════════════════
+    // CONFIGURATION
+    // ══════════════════════════════════════════
+
+    // Apps Script doPost() — ALL requests go here directly.
+    // Daemon identity is passed as a field in the request body,
+    // not via daemon agent proxy.
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt4RuRQgPIOC3s8vaHMZQC0hT11t9iRnykIic6Y-nVgUKonjmy3OnpY1w183UoI1l90w/exec';
+
+    // ══════════════════════════════════════════
+    // DAEMON IDENTITY (Level 1 — identity only)
+    //
+    // BrowserApp gives us the merchant's daemon name
+    // (e.g. "zoniou.magicid.cloud") when running inside
+    // a daemon shell. We pass this to Apps Script so it
+    // can look up the merchant in the CRM.
+    //
+    // No daemon agent, no daemon storage, no cross-daemon
+    // calls. Just identity.
+    // ══════════════════════════════════════════
+
+    let daemonId = null;
+    let isAuthenticated = false;
+
+    async function initDaemon() {
+      try {
+        const app = await BrowserApp.getInstance('loyaltystrategist');
+        if (!app.isOrphan()) {
+          daemonId = app.getParty();
+          isAuthenticated = true;
+          console.log('🔮 Authenticated: ' + daemonId);
+        } else {
+          console.log('🔮 Orphan mode — anonymous user');
+        }
+      } catch (e) {
+        console.log('🔮 No daemon shell — orphan mode');
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════
+
+    let conversationHistory = [];
+    let isWaiting = false;
+    let statusTimers = [];
+    let messageCount = 0;
+
+    marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
+
+    // ══════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════
+
+    window.addEventListener('load', async function() {
+      await initDaemon();
+
+      setTimeout(function() {
+        document.getElementById('splash').classList.add('hidden');
+        showWelcome();
+      }, 800);
+
+      if (isAuthenticated) {
+        const banner = document.getElementById('identityBanner');
+        const text = document.getElementById('identityText');
+        const displayName = daemonId.replace(/\.magicid\.(cloud|app)$/, '');
+        text.textContent = 'Signed in as ' + displayName;
+        banner.classList.add('visible');
+      }
+
+      const input = document.getElementById('userInput');
+      input.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+      input.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+
+      document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    });
+
+    function showWelcome() {
+      addMessage('assistant',
+        'Welcome to Magic! 🔮\n\n' +
+        'I\'m your AI Loyalty Strategist. I\'ll help you design offers that ' +
+        'bring Magic\'s **185,000 verified members** to your business.\n\n' +
+        'Should we speak in **English** or **Ελληνικά**?'
+      );
+    }
+
+    // ══════════════════════════════════════════
+    // RESPONSE CLEANING
+    // ══════════════════════════════════════════
+
+    function cleanResponse(text) {
+      text = text.replace(/```[\s]*\n?[\s]*(?:SESSION_ID\|)?GS-[\s\S]*?```/g, '');
+      text = text.replace(/^(?:SESSION_ID\|)?GS-\d+\|.*$/gm, '');
+      text = text.replace(/^GS-XXX\|.*$/gm, '');
+      text = text.replace(/✅.*?(?:session|data|saved|CRM|σύστημα|αποθηκεύ).*$/gim, '');
+      text = text.replace(/📊.*?Session Data.*$/gim, '');
+      text = text.replace(/```[\s]*\n?[\s]*📧[\s\S]*?```/g, '');
+      text = text.replace(/📧EMAIL:.*?📧/g, '');
+      text = text.replace(/\n{3,}/g, '\n\n').trim();
+      return text;
+    }
+
+    function hasEmailMarker(text) { return /📧EMAIL:.+?📧/.test(text); }
+
+    function styleStrategyBlocks(html) {
+      html = html.replace(/Strategy Note:?<\/strong>\s*([\s\S]*?)(?=Distribution Strategy|Option \d|<\/div>|$)/gi,
+        '<div class="strategy-block">🎯 <strong>Strategy Note:</strong> $1</div>');
+      html = html.replace(/Distribution Strategy:?<\/strong>\s*([\s\S]*?)(?=Option \d|Strategy Note|<\/div>|$)/gi,
+        '<div class="strategy-block">📢 <strong>Distribution:</strong> $1</div>');
+      return html;
+    }
+
+    // ══════════════════════════════════════════
+    // ADD MESSAGE TO CHAT
+    // ══════════════════════════════════════════
+
+    function addMessage(role, text) {
+      const chatArea = document.getElementById('chatArea');
+      const div = document.createElement('div');
+      div.className = 'message ' + role;
+      if (role === 'assistant') {
+        div.innerHTML = styleStrategyBlocks(marked.parse(cleanResponse(text)));
+      } else if (role === 'system') {
+        div.textContent = text;
+      } else {
+        div.innerHTML = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      }
+      chatArea.appendChild(div);
+      requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
+    }
+
+    // ══════════════════════════════════════════
+    // TYPING INDICATOR
+    // ══════════════════════════════════════════
+
+    function startTypingStatus(isLong) {
+      document.getElementById('typingContainer').classList.add('active');
+      clearStatusTimers();
+      if (isLong) {
+        const statusEl = document.getElementById('typingStatus');
+        [{ d: 0, t: '' }, { d: 3000, t: 'designing your offers...' }, { d: 7000, t: 'analysing your market...' }, { d: 12000, t: 'crafting strategies...' }]
+          .forEach(m => statusTimers.push(setTimeout(() => statusEl.textContent = m.t, m.d)));
+      }
+      document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
+    }
+
+    function stopTypingStatus() {
+      clearStatusTimers();
+      document.getElementById('typingContainer').classList.remove('active');
+      document.getElementById('typingStatus').textContent = '';
+    }
+
+    function clearStatusTimers() { statusTimers.forEach(t => clearTimeout(t)); statusTimers = []; }
+
+    // ══════════════════════════════════════════
+    // SEND MESSAGE — always direct to Apps Script
+    // ══════════════════════════════════════════
+
+    async function sendMessage() {
+      if (isWaiting) return;
+
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage('user', text);
+      input.value = '';
+      input.style.height = 'auto';
+
+      conversationHistory.push({ role: 'user', text: text });
+      messageCount++;
+
+      isWaiting = true;
+      startTypingStatus(messageCount >= 3);
+      document.getElementById('sendBtn').disabled = true;
+
+      try {
+        // Build request body — always includes conversation history,
+        // adds daemonId when we have an authenticated daemon identity
+        const payload = { history: conversationHistory };
+        if (isAuthenticated && daemonId) {
+          payload.daemonId = daemonId;
+        }
+
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload),
+          redirect: 'follow'
+        });
+
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const result = await response.json();
+
+        isWaiting = false;
+        stopTypingStatus();
+        document.getElementById('sendBtn').disabled = false;
+
+        if (result.ok) {
+          conversationHistory.push({ role: 'assistant', text: result.text });
+          addMessage('assistant', result.text);
+
+          if (hasEmailMarker(result.text)) {
+            addMessage('system', '✉️ Offer summary sent to your email');
+          } else if (result.text.match(/GS-\d+\|/) || result.text.match(/GS-XXX\|/)) {
+            addMessage('system', '🔒 Anonymised data helps us improve offer suggestions for your business');
+          }
+        } else {
+          addMessage('error', 'Error: ' + (result.error || 'Something went wrong'));
+        }
+
+      } catch (err) {
+        isWaiting = false;
+        stopTypingStatus();
+        document.getElementById('sendBtn').disabled = false;
+        addMessage('error', 'Connection error. Please check your internet and try again.');
+        console.error('Fetch error:', err);
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // ONLINE/OFFLINE
+    // ══════════════════════════════════════════
+
+    window.addEventListener('offline', () => {
+      const b = document.getElementById('connectionBanner');
+      b.className = 'connection-banner offline';
+      b.textContent = 'You\'re offline — messages will send when you reconnect';
+    });
+    window.addEventListener('online', () => {
+      const b = document.getElementById('connectionBanner');
+      b.className = 'connection-banner';
+      b.textContent = '';
+    });
+  </script>
+</body>
+</html>

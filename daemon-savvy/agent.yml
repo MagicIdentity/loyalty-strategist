@@ -1,0 +1,18 @@
+title: Magic Loyalty Strategist
+prefix: loyaltystrategist
+
+scope:
+  use:
+    description: Can use the Loyalty Strategist
+
+grant:
+  ${party}:
+    - use
+  '%':
+    - use
+
+tab:
+  v1:
+    src: agent/loyaltystrategist.ts
+    importmap: agent/importmap.json
+    ttl: 120
