@@ -273,7 +273,7 @@
     // CONFIGURATION
     // ══════════════════════════════════════════
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwOR1ru9tf92HJybqRHmJ5C6afdMLdbZockHpDwUMdZufIqxPep2FvnBbSEFXcRSZHJuQ/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxoqh8VMk4RiKOgC5xru06EZeD6sDLdjln5veJToupHnhx9XNw10aei3GlX2Ayf1bB3w/exec';
 
     // ══════════════════════════════════════════
     // DAEMON IDENTITY (Level 1 — identity only)
@@ -441,6 +441,7 @@
       const card = document.getElementById('emailPromptCard');
 
       const email = (input.value || '').trim();
+      console.log('=== OFFER CONTENT ===', lastOffersContent);
 
       // Basic validation
       const atIdx = email.indexOf('@');
