@@ -7,12 +7,12 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Magic Strategist">
-  <meta name="description" content="Design loyalty strategies for 185,000 verified Magic members">
+  <meta name="apple-mobile-web-app-title" content="Magic Intelligence">
+  <meta name="description" content="Your AI store intelligence advisor — powered by Magic">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Magic Loyalty Strategist</title>
+  <title>Magic Store Intelligence</title>
 
   <!-- WebDaemon — identity only (no backend agent) -->
   <link rel="webdaemon" href="agent.yml">
@@ -120,64 +120,9 @@
       .message.assistant tbody td:first-child { min-width: 80px; }
       .message { max-width: 93%; font-size: 13.5px; }
     }
-    .strategy-block { background: var(--magic-wash); border-left: 3px solid var(--magic-mid); padding: 8px 12px; margin: 6px 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 13px; line-height: 1.5; }
-    .strategy-block strong { color: var(--magic-primary); }
     .message.assistant pre { display: none; }
     .message.assistant code { background: var(--magic-wash); padding: 1px 5px; border-radius: 4px; font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; }
     .message.assistant hr { border: none; border-top: 2px solid var(--magic-primary); margin: 14px 0; opacity: 0.3; }
-
-    /* ══════════════════════════════════════════
-       EMAIL PROMPT CARD
-       ══════════════════════════════════════════ */
-    .email-prompt-card {
-      align-self: flex-start;
-      max-width: 88%;
-      background: var(--magic-wash);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      animation: msg-in 0.3s ease-out;
-    }
-    .email-prompt-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
-    .email-prompt-body { flex: 1; min-width: 0; }
-    .email-prompt-title { font-size: 13px; font-weight: 600; color: var(--magic-primary); margin-bottom: 8px; }
-    .email-prompt-form { display: flex; gap: 6px; }
-    .email-prompt-form input {
-      flex: 1; min-width: 0;
-      border: 1.5px solid var(--border); border-radius: 8px;
-      padding: 8px 10px; font-size: 14px; font-family: inherit;
-      outline: none; background: var(--surface); color: var(--text-primary);
-    }
-    .email-prompt-form input:focus { border-color: var(--magic-mid); }
-    .email-prompt-form input::placeholder { color: var(--text-tertiary); }
-    .email-prompt-form button {
-      background: var(--magic-primary); color: white; border: none;
-      border-radius: 8px; padding: 8px 16px; font-size: 13px;
-      font-weight: 600; font-family: inherit; cursor: pointer;
-      white-space: nowrap; flex-shrink: 0; transition: background 0.15s;
-    }
-    .email-prompt-form button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .email-prompt-form button:hover:not(:disabled) { background: var(--magic-mid); }
-    .email-prompt-status { font-size: 12px; margin-top: 6px; color: var(--text-secondary); }
-    .email-prompt-status.error { color: #B91C1C; }
-    .email-prompt-dismiss {
-      background: none; border: none; color: var(--text-tertiary);
-      cursor: pointer; font-size: 18px; padding: 0; line-height: 1;
-      flex-shrink: 0; opacity: 0.5; transition: opacity 0.15s;
-    }
-    .email-prompt-dismiss:hover { opacity: 1; }
-    .email-prompt-card.sent {
-      background: #EDF7ED; border-color: #A5D6A7;
-    }
-    .email-prompt-card.sent .email-prompt-title { color: #2E7D32; }
-    @media (max-width: 767px) {
-      .email-prompt-card { max-width: 93%; }
-      .email-prompt-form { flex-direction: column; }
-      .email-prompt-form button { align-self: flex-end; }
-    }
 
     .typing-container { align-self: flex-start; display: none; flex-direction: column; gap: 5px; padding: 0 20px 8px 20px; }
     @media (max-width: 767px) { .typing-container { padding: 0 14px 6px 14px; } }
@@ -221,18 +166,18 @@
 
 <body>
   <div class="splash" id="splash">
-    <div class="splash-mark">🔮</div>
-    <div class="splash-text">Magic Loyalty Strategist</div>
+    <div class="splash-mark">📊</div>
+    <div class="splash-text">Magic Store Intelligence</div>
   </div>
 
   <div class="app-shell">
     <div class="header">
-      <div class="header-mark">🔮</div>
+      <div class="header-mark">📊</div>
       <div class="header-text">
-        <h1>Magic Loyalty Strategist</h1>
-        <p>Loyalty strategies for 185,000 members</p>
+        <h1>Magic Store Intelligence</h1>
+        <p>Your AI business advisor</p>
       </div>
-      <div class="header-status"><span class="dot"></span><span>ONLINE</span></div>
+      <div class="header-status"><span class="dot"></span><span>LIVE</span></div>
     </div>
 
     <div class="connection-banner" id="connectionBanner"></div>
@@ -250,7 +195,7 @@
     </div>
 
     <div class="input-area">
-      <textarea id="userInput" placeholder="Type your message..." rows="1" enterkeyhint="send"></textarea>
+      <textarea id="userInput" placeholder="Ρωτήστε για τους πελάτες σας..." rows="1" enterkeyhint="send"></textarea>
       <button class="send-btn" id="sendBtn" aria-label="Send message">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -276,7 +221,7 @@
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUDdGJO8Q01M9g5ssI03iiP8Jo4gEuvBuojFDanOinaR_Xs_FLktvwuYuZZVrNxhHE5g/exec';
 
     // ══════════════════════════════════════════
-    // DAEMON IDENTITY (Level 1 — identity only)
+    // DAEMON IDENTITY
     // ══════════════════════════════════════════
 
     let daemonId = null;
@@ -288,12 +233,12 @@
         if (!app.isOrphan()) {
           daemonId = app.getParty();
           isAuthenticated = true;
-          console.log('🔮 Authenticated: ' + daemonId);
+          console.log('📊 Authenticated: ' + daemonId);
         } else {
-          console.log('🔮 Orphan mode — anonymous user');
+          console.log('📊 Orphan mode — anonymous user');
         }
       } catch (e) {
-        console.log('🔮 No daemon shell — orphan mode');
+        console.log('📊 No daemon shell — orphan mode');
       }
     }
 
@@ -304,9 +249,7 @@
     let conversationHistory = [];
     let isWaiting = false;
     let statusTimers = [];
-    let messageCount = 0;
-    let lastOffersContent = null;
-    let emailPromptShown = false;
+    let initialLoadDone = false;
 
     marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
 
@@ -319,16 +262,19 @@
 
       setTimeout(function() {
         document.getElementById('splash').classList.add('hidden');
-        showWelcome();
-      }, 800);
 
-      if (isAuthenticated) {
-        const banner = document.getElementById('identityBanner');
-        const text = document.getElementById('identityText');
-        const displayName = daemonId;
-        text.textContent = 'Connected to ' + displayName;
-        banner.classList.add('visible');
-      }
+        if (isAuthenticated) {
+          const banner = document.getElementById('identityBanner');
+          const text = document.getElementById('identityText');
+          text.textContent = 'Connected as ' + daemonId;
+          banner.classList.add('visible');
+
+          // Auto-load dashboard data
+          loadDashboard();
+        } else {
+          showWelcome();
+        }
+      }, 800);
 
       const input = document.getElementById('userInput');
       input.addEventListener('input', function() {
@@ -347,223 +293,64 @@
 
     function showWelcome() {
       addMessage('assistant',
-        'Welcome to Magic! 🔮\n\n' +
-        'I\'m your AI Loyalty Strategist. I\'ll help you design offers that ' +
-        'bring Magic\'s **185,000 verified members** to your business.\n\n' +
-        'Should we speak in **English** or **Ελληνικά**?'
+        'Καλώς ήρθατε στο Magic. 📊\n\n' +
+        'Είμαι ο AI σύμβουλός σας — σας βοηθάω να δείτε ποιοι είναι οι ' +
+        'καλύτεροι πελάτες σας, πότε αρχίζουν να απομακρύνονται, και τι ' +
+        'μπορείτε να κάνετε.\n\n' +
+        'Για να δω τα στοιχεία σας, χρειάζομαι να συνδεθείτε μέσω του ' +
+        'Magic ID σας. Αν δεν έχετε ακόμα, επικοινωνήστε στο ' +
+        'customersuccess@magic-id.com.'
       );
     }
 
-    // ══════════════════════════════════════════
-    // RESPONSE CLEANING
-    // ══════════════════════════════════════════
+    async function loadDashboard() {
+      if (initialLoadDone) return;
+      initialLoadDone = true;
 
-    function cleanResponse(text) {
-      text = text.replace(/```[\s]*\n?[\s]*(?:SESSION_ID\|)?GS-[\s\S]*?```/g, '');
-      text = text.replace(/^(?:SESSION_ID\|)?GS-\d+\|.*$/gm, '');
-      text = text.replace(/^GS-XXX\|.*$/gm, '');
-      text = text.replace(/✅.*?(?:session|data|saved|CRM|σύστημα|αποθηκεύ).*$/gim, '');
-      text = text.replace(/📊.*?Session Data.*$/gim, '');
-      // Strip legacy email markers (safety net)
-      text = text.replace(/```[\s]*\n?[\s]*📧[\s\S]*?```/g, '');
-      text = text.replace(/📧EMAIL:.*?📧/g, '');
-      // Strip email invitation text that Gemini may still output
-      text = text.replace(/---\s*\n+\*\*(?:Επόμενο Βήμα|Next Step)[\s\S]*$/i, '');
-      text = text.replace(/\n{3,}/g, '\n\n').trim();
-      return text;
-    }
-
-    // ══════════════════════════════════════════
-    // DETECT OFFERS IN RESPONSE
-    // ══════════════════════════════════════════
-
-    function responseContainsOffers(text) {
-      if (!text || text.length < 500) return false;
-      return (text.indexOf('Reward Item') > -1 || text.indexOf('Αντικείμενο Ανταμοιβής') > -1 ||
-              text.indexOf('Nominal Value') > -1 || text.indexOf('Ονομαστική Αξία') > -1);
-    }
-
-    function detectLanguageFromHistory() {
-      for (let i = conversationHistory.length - 1; i >= 0; i--) {
-        if (conversationHistory[i].role === 'assistant' && /[\u0370-\u03FF]/.test(conversationHistory[i].text)) {
-          return 'Greek';
-        }
-      }
-      return 'English';
-    }
-
-    // ══════════════════════════════════════════
-    // EMAIL PROMPT (decoupled from Gemini)
-    // ══════════════════════════════════════════
-
-    function showEmailPrompt() {
-      const chatArea = document.getElementById('chatArea');
-      const lang = detectLanguageFromHistory();
-      const isGreek = lang === 'Greek';
-
-      const card = document.createElement('div');
-      card.id = 'emailPromptCard';
-      card.className = 'email-prompt-card';
-      card.innerHTML =
-        '<div class="email-prompt-icon">✉️</div>' +
-        '<div class="email-prompt-body">' +
-          '<div class="email-prompt-title">' +
-            (isGreek ? 'Λάβετε τα προγράμματά σας με email' : 'Get your programs by email') +
-          '</div>' +
-          '<div class="email-prompt-form">' +
-            '<input type="email" id="emailPromptInput" placeholder="you@email.com" autocomplete="email" />' +
-            '<button id="emailPromptBtn">' + (isGreek ? 'Αποστολή' : 'Send') + '</button>' +
-          '</div>' +
-          '<div class="email-prompt-status" id="emailPromptStatus"></div>' +
-        '</div>' +
-        '<button class="email-prompt-dismiss" id="emailPromptDismiss">&times;</button>';
-
-      chatArea.appendChild(card);
-      requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
-
-      // Wire up events
-      document.getElementById('emailPromptBtn').addEventListener('click', submitOfferEmail);
-      document.getElementById('emailPromptInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); submitOfferEmail(); }
-      });
-      document.getElementById('emailPromptDismiss').addEventListener('click', function() {
-        card.remove();
-      });
-
-      // Focus the input
-      setTimeout(function() { document.getElementById('emailPromptInput').focus(); }, 100);
-    }
-
-    async function submitOfferEmail() {
-      const input = document.getElementById('emailPromptInput');
-      const btn = document.getElementById('emailPromptBtn');
-      const status = document.getElementById('emailPromptStatus');
-      const card = document.getElementById('emailPromptCard');
-
-      const email = (input.value || '').trim();
-      console.log('=== OFFER CONTENT ===', lastOffersContent);
-
-      // Basic validation
-      const atIdx = email.indexOf('@');
-      if (atIdx <= 0 || email.indexOf('.', atIdx) <= atIdx) {
-        status.textContent = detectLanguageFromHistory() === 'Greek'
-          ? 'Παρακαλώ εισάγετε ένα έγκυρο email'
-          : 'Please enter a valid email';
-        status.className = 'email-prompt-status error';
-        input.focus();
-        return;
-      }
-
-      // Disable form
-      input.disabled = true;
-      btn.disabled = true;
-      btn.textContent = '...';
-      status.textContent = '';
-      status.className = 'email-prompt-status';
+      isWaiting = true;
+      startTypingStatus();
+      document.getElementById('sendBtn').disabled = true;
 
       try {
+        const payload = {
+          action: 'dashboard',
+          history: [],
+          daemonId: daemonId
+        };
+
         const response = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({
-            action: 'sendOfferEmail',
-            email: email,
-            offerContent: lastOffersContent,
-            language: detectLanguageFromHistory()
-          }),
+          body: JSON.stringify(payload),
           redirect: 'follow'
         });
 
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const result = await response.json();
 
+        isWaiting = false;
+        stopTypingStatus();
+        document.getElementById('sendBtn').disabled = false;
+
         if (result.ok) {
-          // Success state
-          card.classList.add('sent');
-          card.innerHTML =
-            '<div class="email-prompt-icon">✅</div>' +
-            '<div class="email-prompt-body">' +
-              '<div class="email-prompt-title">' +
-                (detectLanguageFromHistory() === 'Greek'
-                  ? 'Τα προγράμματά σας στάλθηκαν στο ' + email
-                  : 'Your programs have been sent to ' + email) +
-              '</div>' +
-            '</div>';
-          // Scroll to show confirmation
-          requestAnimationFrame(() => {
-            document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
-          });
+            conversationHistory.push({ role: 'user', text: 'Δείξε μου τα στοιχεία μου.' });
+            conversationHistory.push({ role: 'assistant', text: result.text });
+            addMessage('assistant', result.text);
         } else {
-          throw new Error(result.error || 'Unknown error');
+          addMessage('error', 'Error: ' + (result.error || 'Could not load store data'));
         }
+
       } catch (err) {
-        input.disabled = false;
-        btn.disabled = false;
-        btn.textContent = detectLanguageFromHistory() === 'Greek' ? 'Αποστολή' : 'Send';
-        status.textContent = detectLanguageFromHistory() === 'Greek'
-          ? 'Κάτι πήγε στραβά. Δοκιμάστε ξανά.'
-          : 'Something went wrong. Try again.';
-        status.className = 'email-prompt-status error';
-        console.error('Email send error:', err);
+        isWaiting = false;
+        stopTypingStatus();
+        document.getElementById('sendBtn').disabled = false;
+        addMessage('error', 'Connection error. Please check your internet and try again.');
+        console.error('Dashboard load error:', err);
       }
     }
 
     // ══════════════════════════════════════════
-    // EXTRACT STRATEGY ROWS FROM TABLES (DOM-based)
-    // ══════════════════════════════════════════
-
-    function extractStrategyRows(container) {
-      const tables = container.querySelectorAll('table');
-      tables.forEach(function(table) {
-        const rows = table.querySelectorAll('tbody tr');
-        const extracted = [];
-
-        rows.forEach(function(row) {
-          const firstCell = row.querySelector('td:first-child');
-          if (!firstCell) return;
-
-          const label = firstCell.textContent.trim().toLowerCase();
-          const isStrategy = label.includes('strategy note') ||
-                             label.includes('distribution strategy') ||
-                             label.includes('distribution') ||
-                             label.includes('στρατηγική σημείωση') ||
-                             label.includes('στρατηγική διανομής') ||
-                             label.includes('σημείωση στρατηγικής') ||
-                             label.includes('διανομή');
-
-          if (isStrategy) {
-            const icon = label.includes('distribution') || label.includes('διανομ') ? '📢' : '🎯';
-            const title = firstCell.innerHTML;
-            const secondCell = row.querySelector('td:nth-child(2)');
-            const content = secondCell ? secondCell.innerHTML : '';
-            extracted.push({ icon: icon, title: title, content: content });
-            row.remove();
-          }
-        });
-
-        const remainingRows = table.querySelectorAll('tbody tr');
-        if (remainingRows.length === 0) {
-          extracted.forEach(function(item) {
-            const block = document.createElement('div');
-            block.className = 'strategy-block';
-            block.innerHTML = item.icon + ' <strong>' + item.title + '</strong> ' + item.content;
-            table.parentNode.insertBefore(block, table);
-          });
-          table.remove();
-        } else {
-          const ref = table.nextSibling;
-          extracted.forEach(function(item) {
-            const block = document.createElement('div');
-            block.className = 'strategy-block';
-            block.innerHTML = item.icon + ' <strong>' + item.title + '</strong> ' + item.content;
-            table.parentNode.insertBefore(block, ref);
-          });
-        }
-      });
-    }
-
-    // ══════════════════════════════════════════
-    // ADD MESSAGE TO CHAT
+    // ADD MESSAGE
     // ══════════════════════════════════════════
 
     function addMessage(role, text) {
@@ -571,15 +358,7 @@
       const div = document.createElement('div');
       div.className = 'message ' + role;
       if (role === 'assistant') {
-        const cleaned = cleanResponse(text);
-        div.innerHTML = marked.parse(cleaned);
-        extractStrategyRows(div);
-
-        // Detect offers and show email prompt
-        if (responseContainsOffers(text) && !emailPromptShown) {
-          lastOffersContent = cleaned;
-          emailPromptShown = true;
-        }
+        div.innerHTML = marked.parse(text);
       } else if (role === 'system') {
         div.textContent = text;
       } else {
@@ -587,25 +366,18 @@
       }
       chatArea.appendChild(div);
       requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
-
-      // Show email prompt after the message is rendered
-      if (role === 'assistant' && emailPromptShown && lastOffersContent && !document.getElementById('emailPromptCard')) {
-        setTimeout(showEmailPrompt, 400);
-      }
     }
 
     // ══════════════════════════════════════════
     // TYPING INDICATOR
     // ══════════════════════════════════════════
 
-    function startTypingStatus(isLong) {
+    function startTypingStatus() {
       document.getElementById('typingContainer').classList.add('active');
       clearStatusTimers();
-      if (isLong) {
-        const statusEl = document.getElementById('typingStatus');
-        [{ d: 0, t: '' }, { d: 3000, t: 'designing your offers...' }, { d: 7000, t: 'analysing your market...' }, { d: 12000, t: 'crafting strategies...' }]
-          .forEach(m => statusTimers.push(setTimeout(() => statusEl.textContent = m.t, m.d)));
-      }
+      const statusEl = document.getElementById('typingStatus');
+      [{ d: 0, t: '' }, { d: 2000, t: 'loading your data...' }, { d: 5000, t: 'analysing patterns...' }]
+        .forEach(m => statusTimers.push(setTimeout(() => statusEl.textContent = m.t, m.d)));
       document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
     }
 
@@ -618,7 +390,7 @@
     function clearStatusTimers() { statusTimers.forEach(t => clearTimeout(t)); statusTimers = []; }
 
     // ══════════════════════════════════════════
-    // SEND MESSAGE
+    // SEND MESSAGE (follow-up questions)
     // ══════════════════════════════════════════
 
     async function sendMessage() {
@@ -633,17 +405,17 @@
       input.style.height = 'auto';
 
       conversationHistory.push({ role: 'user', text: text });
-      messageCount++;
 
       isWaiting = true;
-      startTypingStatus(messageCount >= 3);
+      startTypingStatus();
       document.getElementById('sendBtn').disabled = true;
 
       try {
-        const payload = { history: conversationHistory };
-        if (isAuthenticated && daemonId) {
-          payload.daemonId = daemonId;
-        }
+        const payload = {
+          action: 'dashboard',
+          history: conversationHistory,
+          daemonId: daemonId
+        };
 
         const response = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
