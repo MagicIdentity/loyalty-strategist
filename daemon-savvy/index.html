@@ -291,13 +291,16 @@
     // CONFIGURATION
     // ══════════════════════════════════════════
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFc7fbGojUzhQ5JZmpqHSYy8YRXv3UdyTGN-zsy9plibPEJb1epkxeemKsm1V-K8RCOw/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyO4QNjAvStNdnR3EU3bvH4hoZh1F7oTbjH84HXCP7EIU4RjhC815hvjIFxxJg6uomd/exec';
 
-    const SESSION_KEYS = {
-      history: 'magic_strategist_history',
-      messages: 'magic_strategist_messages',
-      meta: 'magic_strategist_meta'
-    };
+    function getSessionKeys() {
+      var id = daemonId || 'anon';
+      return {
+        history: 'magic_strategist_history_' + id,
+        messages: 'magic_strategist_messages_' + id,
+        meta: 'magic_strategist_meta_' + id
+      };
+    }
 
     // ══════════════════════════════════════════
     // DAEMON IDENTITY (Level 1 — identity only)
@@ -340,10 +343,12 @@
 
     function saveState() {
       try {
-        sessionStorage.setItem(SESSION_KEYS.history, JSON.stringify(conversationHistory));
+        var keys = getSessionKeys();
+        sessionStorage.setItem(keys.history, JSON.stringify(conversationHistory));
+        sessionStorage.setItem('magic_session_ts_' + (daemonId || 'anon'), Date.now().toString());
         const msgs = conversationHistory.filter(m => m.role === 'user' || m.role === 'assistant');
-        sessionStorage.setItem(SESSION_KEYS.messages, JSON.stringify(msgs));
-        sessionStorage.setItem(SESSION_KEYS.meta, JSON.stringify({
+        sessionStorage.setItem(keys.messages, JSON.stringify(msgs));
+        sessionStorage.setItem(keys.meta, JSON.stringify({
           messageCount: messageCount,
           emailPromptShown: emailPromptShown,
           lastOffersContent: lastOffersContent
@@ -353,9 +358,10 @@
 
     function loadSavedState() {
       try {
-        const history = sessionStorage.getItem(SESSION_KEYS.history);
-        const messages = sessionStorage.getItem(SESSION_KEYS.messages);
-        const meta = sessionStorage.getItem(SESSION_KEYS.meta);
+        var keys = getSessionKeys();
+        const history = sessionStorage.getItem(keys.history);
+        const messages = sessionStorage.getItem(keys.messages);
+        const meta = sessionStorage.getItem(keys.meta);
         return {
           history: history ? JSON.parse(history) : null,
           messages: messages ? JSON.parse(messages) : null,
@@ -368,11 +374,20 @@
 
     function hasSavedState() {
       try {
-        return sessionStorage.getItem(SESSION_KEYS.history) !== null;
-      } catch (e) {
-        return false;
-      }
+        var keys = getSessionKeys();
+        if (!sessionStorage.getItem(keys.history)) return false;
+        var ts = Number(sessionStorage.getItem('magic_session_ts_' + (daemonId || 'anon')) || 0);
+        if (Date.now() - ts > 15 * 60 * 1000) {
+          sessionStorage.removeItem(keys.history);
+          sessionStorage.removeItem(keys.messages);
+          sessionStorage.removeItem(keys.meta);
+          sessionStorage.removeItem('magic_session_ts_' + (daemonId || 'anon'));
+          return false;
+        }
+        return true;
+      } catch (e) { return false; }
     }
+
 
     // ══════════════════════════════════════════
     // INIT
