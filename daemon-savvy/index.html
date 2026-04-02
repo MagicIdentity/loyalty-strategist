@@ -291,7 +291,7 @@
     // CONFIGURATION
     // ══════════════════════════════════════════
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyO4QNjAvStNdnR3EU3bvH4hoZh1F7oTbjH84HXCP7EIU4RjhC815hvjIFxxJg6uomd/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUg74BhM3cp8s-c1778nyMBP3c8NUskibWC5xDFcckiNx_wpJRIo1YjYnWKyEQEwFWtw/exec';
 
     function getSessionKeys() {
       var id = daemonId || 'anon';
@@ -346,7 +346,7 @@
         var keys = getSessionKeys();
         sessionStorage.setItem(keys.history, JSON.stringify(conversationHistory));
         sessionStorage.setItem('magic_session_ts_' + (daemonId || 'anon'), Date.now().toString());
-        const msgs = conversationHistory.filter(m => m.role === 'user' || m.role === 'assistant');
+        const msgs = conversationHistory.filter(m => (m.role === 'user' || m.role === 'assistant') && !m.hidden);
         sessionStorage.setItem(keys.messages, JSON.stringify(msgs));
         sessionStorage.setItem(keys.meta, JSON.stringify({
           messageCount: messageCount,
@@ -407,9 +407,11 @@
           setupDashboardButton();
         }
 
-        // Check for saved session — restore or fresh start
+        // Check for saved session — restore, auto-welcome, or fresh start
         if (hasSavedState()) {
           restoreSession();
+        } else if (isAuthenticated) {
+          autoWelcome();
         } else {
           showWelcome();
         }
@@ -433,10 +435,60 @@
     function showWelcome() {
       addMessage('assistant',
         'Welcome to Magic! 🔮\n\n' +
-        'I\'m your AI Loyalty Strategist. I\'ll help you design offers that ' +
+        'I\'m your AI Loyalty Strategist. I\'ll help you design programs that ' +
         'bring Magic\'s **185,000 verified members** to your business.\n\n' +
         'Should we speak in **English** or **Ελληνικά**?'
       );
+    }
+
+    async function autoWelcome() {
+      // Identified merchant — let the model generate a personalized welcome.
+      // Send a hidden trigger; display only the model's response.
+      isWaiting = true;
+      startTypingStatus(false);
+      document.getElementById('sendBtn').disabled = true;
+
+      // Hidden trigger — included in Gemini context but never displayed
+      conversationHistory.push({ role: 'user', text: '.', hidden: true });
+
+      try {
+        const payload = {
+          history: [{ role: 'user', text: '.' }],
+          daemonId: daemonId
+        };
+
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload),
+          redirect: 'follow'
+        });
+
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const result = await response.json();
+
+        isWaiting = false;
+        stopTypingStatus();
+        document.getElementById('sendBtn').disabled = false;
+
+        if (result.ok) {
+          conversationHistory.push({ role: 'assistant', text: result.text });
+          addMessage('assistant', result.text);
+          saveState();
+        } else {
+          // Fallback: clear trigger, show static welcome
+          conversationHistory = [];
+          showWelcome();
+        }
+      } catch (err) {
+        isWaiting = false;
+        stopTypingStatus();
+        document.getElementById('sendBtn').disabled = false;
+        // Fallback: clear trigger, show static welcome
+        conversationHistory = [];
+        showWelcome();
+        console.error('Auto-welcome error:', err);
+      }
     }
 
     function setupDashboardButton() {
