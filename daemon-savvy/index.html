@@ -90,10 +90,28 @@
     .identity-banner.visible { display: flex; }
     .identity-banner .id-dot { width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; flex-shrink: 0; }
 
+    /* ══════ DASHBOARD BUTTON ══════ */
+
+    .dashboard-btn-wrap {
+      padding: 8px 20px; flex-shrink: 0;
+      border-bottom: 1px solid var(--border-light); display: none;
+    }
+    .dashboard-btn-wrap.visible { display: block; }
+    .dashboard-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 10px 16px;
+      background: var(--magic-wash); color: var(--magic-primary);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s; text-decoration: none;
+    }
+    .dashboard-btn:hover { background: var(--magic-tint); }
+
     .chat-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
     @media (max-width: 767px) { .chat-area { padding: 14px; gap: 10px; } }
 
     .message { max-width: 88%; padding: 12px 16px; border-radius: var(--radius-md); font-size: 14px; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; animation: msg-in 0.25s ease-out; }
+    .message.restored { animation: none; }
     @keyframes msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .message.assistant { align-self: flex-start; background: var(--surface-raised); color: var(--text-primary); border-bottom-left-radius: 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
     .message.user { align-self: flex-end; background: var(--magic-primary); color: white; border-bottom-right-radius: 4px; }
@@ -130,15 +148,10 @@
        EMAIL PROMPT CARD
        ══════════════════════════════════════════ */
     .email-prompt-card {
-      align-self: flex-start;
-      max-width: 88%;
-      background: var(--magic-wash);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
+      align-self: flex-start; max-width: 88%;
+      background: var(--magic-wash); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 14px 16px;
+      display: flex; align-items: flex-start; gap: 10px;
       animation: msg-in 0.3s ease-out;
     }
     .email-prompt-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
@@ -169,9 +182,7 @@
       flex-shrink: 0; opacity: 0.5; transition: opacity 0.15s;
     }
     .email-prompt-dismiss:hover { opacity: 1; }
-    .email-prompt-card.sent {
-      background: #EDF7ED; border-color: #A5D6A7;
-    }
+    .email-prompt-card.sent { background: #EDF7ED; border-color: #A5D6A7; }
     .email-prompt-card.sent .email-prompt-title { color: #2E7D32; }
     @media (max-width: 767px) {
       .email-prompt-card { max-width: 93%; }
@@ -242,6 +253,13 @@
       <span id="identityText"></span>
     </div>
 
+    <!-- Dashboard button -->
+    <div class="dashboard-btn-wrap" id="dashboardBtnWrap">
+      <a class="dashboard-btn" id="dashboardBtn" href="#">
+        📊 <span>View Store Intelligence</span>
+      </a>
+    </div>
+
     <div class="chat-area" id="chatArea"></div>
 
     <div class="typing-container" id="typingContainer">
@@ -274,6 +292,12 @@
     // ══════════════════════════════════════════
 
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFc7fbGojUzhQ5JZmpqHSYy8YRXv3UdyTGN-zsy9plibPEJb1epkxeemKsm1V-K8RCOw/exec';
+
+    const SESSION_KEYS = {
+      history: 'magic_strategist_history',
+      messages: 'magic_strategist_messages',
+      meta: 'magic_strategist_meta'
+    };
 
     // ══════════════════════════════════════════
     // DAEMON IDENTITY (Level 1 — identity only)
@@ -311,6 +335,46 @@
     marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
 
     // ══════════════════════════════════════════
+    // SESSION STORAGE HELPERS
+    // ══════════════════════════════════════════
+
+    function saveState() {
+      try {
+        sessionStorage.setItem(SESSION_KEYS.history, JSON.stringify(conversationHistory));
+        const msgs = conversationHistory.filter(m => m.role === 'user' || m.role === 'assistant');
+        sessionStorage.setItem(SESSION_KEYS.messages, JSON.stringify(msgs));
+        sessionStorage.setItem(SESSION_KEYS.meta, JSON.stringify({
+          messageCount: messageCount,
+          emailPromptShown: emailPromptShown,
+          lastOffersContent: lastOffersContent
+        }));
+      } catch (e) {}
+    }
+
+    function loadSavedState() {
+      try {
+        const history = sessionStorage.getItem(SESSION_KEYS.history);
+        const messages = sessionStorage.getItem(SESSION_KEYS.messages);
+        const meta = sessionStorage.getItem(SESSION_KEYS.meta);
+        return {
+          history: history ? JSON.parse(history) : null,
+          messages: messages ? JSON.parse(messages) : null,
+          meta: meta ? JSON.parse(meta) : null
+        };
+      } catch (e) {
+        return { history: null, messages: null, meta: null };
+      }
+    }
+
+    function hasSavedState() {
+      try {
+        return sessionStorage.getItem(SESSION_KEYS.history) !== null;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // ══════════════════════════════════════════
     // INIT
     // ══════════════════════════════════════════
 
@@ -319,16 +383,22 @@
 
       setTimeout(function() {
         document.getElementById('splash').classList.add('hidden');
-        showWelcome();
-      }, 800);
 
-      if (isAuthenticated) {
-        const banner = document.getElementById('identityBanner');
-        const text = document.getElementById('identityText');
-        const displayName = daemonId;
-        text.textContent = 'Connected to ' + displayName;
-        banner.classList.add('visible');
-      }
+        if (isAuthenticated) {
+          const banner = document.getElementById('identityBanner');
+          const text = document.getElementById('identityText');
+          text.textContent = 'Connected to ' + daemonId;
+          banner.classList.add('visible');
+          setupDashboardButton();
+        }
+
+        // Check for saved session — restore or fresh start
+        if (hasSavedState()) {
+          restoreSession();
+        } else {
+          showWelcome();
+        }
+      }, 800);
 
       const input = document.getElementById('userInput');
       input.addEventListener('input', function() {
@@ -354,6 +424,44 @@
       );
     }
 
+    function setupDashboardButton() {
+      const base = window.location.href.replace(/index\.html.*$/, '').replace(/\?.*$/, '');
+      document.getElementById('dashboardBtn').href = base + 'dashboard.html';
+      document.getElementById('dashboardBtnWrap').classList.add('visible');
+    }
+
+    // ══════════════════════════════════════════
+    // RESTORE SESSION
+    // ══════════════════════════════════════════
+
+    function restoreSession() {
+      const saved = loadSavedState();
+
+      // Restore conversation history
+      if (saved.history) {
+        conversationHistory = saved.history;
+      }
+
+      // Restore meta state
+      if (saved.meta) {
+        messageCount = saved.meta.messageCount || 0;
+        emailPromptShown = saved.meta.emailPromptShown || false;
+        lastOffersContent = saved.meta.lastOffersContent || null;
+      }
+
+      // Replay chat messages
+      if (saved.messages) {
+        for (let i = 0; i < saved.messages.length; i++) {
+          addMessage(saved.messages[i].role, saved.messages[i].text, true);
+        }
+      }
+
+      // If offers were shown and email not yet sent, re-show the prompt
+      if (emailPromptShown && lastOffersContent && !document.getElementById('emailPromptCard')) {
+        setTimeout(showEmailPrompt, 300);
+      }
+    }
+
     // ══════════════════════════════════════════
     // RESPONSE CLEANING
     // ══════════════════════════════════════════
@@ -364,10 +472,8 @@
       text = text.replace(/^GS-XXX\|.*$/gm, '');
       text = text.replace(/✅.*?(?:session|data|saved|CRM|σύστημα|αποθηκεύ).*$/gim, '');
       text = text.replace(/📊.*?Session Data.*$/gim, '');
-      // Strip legacy email markers (safety net)
       text = text.replace(/```[\s]*\n?[\s]*📧[\s\S]*?```/g, '');
       text = text.replace(/📧EMAIL:.*?📧/g, '');
-      // Strip email invitation text that Gemini may still output
       text = text.replace(/---\s*\n+\*\*(?:Επόμενο Βήμα|Next Step)[\s\S]*$/i, '');
       text = text.replace(/\n{3,}/g, '\n\n').trim();
       return text;
@@ -421,7 +527,6 @@
       chatArea.appendChild(card);
       requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
 
-      // Wire up events
       document.getElementById('emailPromptBtn').addEventListener('click', submitOfferEmail);
       document.getElementById('emailPromptInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') { e.preventDefault(); submitOfferEmail(); }
@@ -430,7 +535,6 @@
         card.remove();
       });
 
-      // Focus the input
       setTimeout(function() { document.getElementById('emailPromptInput').focus(); }, 100);
     }
 
@@ -441,9 +545,7 @@
       const card = document.getElementById('emailPromptCard');
 
       const email = (input.value || '').trim();
-      console.log('=== OFFER CONTENT ===', lastOffersContent);
 
-      // Basic validation
       const atIdx = email.indexOf('@');
       if (atIdx <= 0 || email.indexOf('.', atIdx) <= atIdx) {
         status.textContent = detectLanguageFromHistory() === 'Greek'
@@ -454,7 +556,6 @@
         return;
       }
 
-      // Disable form
       input.disabled = true;
       btn.disabled = true;
       btn.textContent = '...';
@@ -478,7 +579,6 @@
         const result = await response.json();
 
         if (result.ok) {
-          // Success state
           card.classList.add('sent');
           card.innerHTML =
             '<div class="email-prompt-icon">✅</div>' +
@@ -489,7 +589,6 @@
                   : 'Your programs have been sent to ' + email) +
               '</div>' +
             '</div>';
-          // Scroll to show confirmation
           requestAnimationFrame(() => {
             document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
           });
@@ -566,17 +665,18 @@
     // ADD MESSAGE TO CHAT
     // ══════════════════════════════════════════
 
-    function addMessage(role, text) {
+    function addMessage(role, text, isRestored) {
       const chatArea = document.getElementById('chatArea');
       const div = document.createElement('div');
-      div.className = 'message ' + role;
+      div.className = 'message ' + role + (isRestored ? ' restored' : '');
+
       if (role === 'assistant') {
         const cleaned = cleanResponse(text);
         div.innerHTML = marked.parse(cleaned);
         extractStrategyRows(div);
 
-        // Detect offers and show email prompt
-        if (responseContainsOffers(text) && !emailPromptShown) {
+        // Detect offers and show email prompt (skip for restored messages)
+        if (!isRestored && responseContainsOffers(text) && !emailPromptShown) {
           lastOffersContent = cleaned;
           emailPromptShown = true;
         }
@@ -588,8 +688,8 @@
       chatArea.appendChild(div);
       requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
 
-      // Show email prompt after the message is rendered
-      if (role === 'assistant' && emailPromptShown && lastOffersContent && !document.getElementById('emailPromptCard')) {
+      // Show email prompt after the message is rendered (skip for restored)
+      if (!isRestored && role === 'assistant' && emailPromptShown && lastOffersContent && !document.getElementById('emailPromptCard')) {
         setTimeout(showEmailPrompt, 400);
       }
     }
@@ -634,6 +734,7 @@
 
       conversationHistory.push({ role: 'user', text: text });
       messageCount++;
+      saveState();
 
       isWaiting = true;
       startTypingStatus(messageCount >= 3);
@@ -662,6 +763,7 @@
         if (result.ok) {
           conversationHistory.push({ role: 'assistant', text: result.text });
           addMessage('assistant', result.text);
+          saveState();
         } else {
           addMessage('error', 'Error: ' + (result.error || 'Something went wrong'));
         }
