@@ -238,6 +238,10 @@
               <div class="chart-title">Visit Times (Hour of Day)</div>
               <div class="chart-canvas-wrap tall"><canvas id="visitHoursChart"></canvas></div>
             </div>
+            <div class="chart-box full-width" id="visitTrendsBox" style="display:none">
+              <div class="chart-title">Visit Trends (Weekly)</div>
+              <div class="chart-canvas-wrap tall"><canvas id="visitTrendsChart"></canvas></div>
+            </div>
           </div>
         </div>
       </div>
@@ -264,7 +268,7 @@
   <script type="module">
     import { BrowserApp } from '$static/lib/js/BrowserApp.js'
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUg74BhM3cp8s-c1778nyMBP3c8NUskibWC5xDFcckiNx_wpJRIo1YjYnWKyEQEwFWtw/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyd5u08o5xcLQ5NL2rhe90rvqV7Ea-l1QANlcrhLRkDfuBv-fkJqkeGxB173gytE4MhlQ/exec';
     function getSessionKeys() {
       var id = daemonId || 'anon';
       return {
@@ -500,6 +504,99 @@
                 beginAtZero: true,
                 grid: { color: '#f0ebf5' },
                 ticks: { font: { family: 'DM Sans', size: 10 }, precision: 0 }
+              }
+            }
+          }
+        });
+      }
+
+      // Visit Trends Chart (Weekly line chart over 90 days)
+      const visitTrends = data.visitTrends || [];
+      if (visitTrends.length >= 3) {
+        document.getElementById('visitTrendsBox').style.display = 'block';
+
+        // Format week labels: "W05" from "2026-W05"
+        const trendLabels = visitTrends.map(t => t.week.split('-')[1]);
+        const trendValues = visitTrends.map(t => t.visits);
+
+        // Compute trend line (simple moving average, window=3)
+        const trendMA = trendValues.map((v, i) => {
+          if (i < 2) return null;
+          return Math.round((trendValues[i-2] + trendValues[i-1] + v) / 3 * 10) / 10;
+        });
+
+        new Chart(document.getElementById('visitTrendsChart'), {
+          type: 'line',
+          data: {
+            labels: trendLabels,
+            datasets: [
+              {
+                label: 'Visits',
+                data: trendValues,
+                borderColor: '#6B3FA0',
+                backgroundColor: 'rgba(107,63,160,0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 4,
+                pointBackgroundColor: '#6B3FA0',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 6,
+                borderWidth: 2.5
+              },
+              {
+                label: 'Trend',
+                data: trendMA,
+                borderColor: '#E8A838',
+                borderDash: [6, 3],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                tension: 0.4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                  font: { family: 'DM Sans', size: 10 },
+                  usePointStyle: true,
+                  pointStyle: 'circle',
+                  padding: 12
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  title: function(ctx) {
+                    // Show full week key on hover
+                    var idx = ctx[0].dataIndex;
+                    return visitTrends[idx].week;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: {
+                  font: { family: 'DM Sans', size: 9 },
+                  maxRotation: 0,
+                  autoSkip: true,
+                  maxTicksLimit: 13
+                }
+              },
+              y: {
+                beginAtZero: true,
+                grid: { color: '#f0ebf5' },
+                ticks: {
+                  font: { family: 'DM Sans', size: 10 },
+                  precision: 0
+                }
               }
             }
           }
